@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
-
 import { ServiceModel } from "../models/service.model";
-
+import { sendEmailPartner } from "../utils/emailUtils";
+import fs from 'fs';
+import path from 'path';
 //To get all the Bookings
+
+
+
 
 export const getAllService = async (req: Request, res: Response) => {
   try {
@@ -12,6 +16,37 @@ export const getAllService = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+export const sendPartnershipEmail = async (req: Request, res: Response) => {
+  try {
+    const sales = process.env.EMAIL_SALES || "";
+    const { email, name, phone, company, message } = req.body;
+
+    const templatePath2 = path.join(__dirname, '../utils/partner.html');
+    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
+
+
+    const htmlContent2 = htmlTemplate2
+      .replace('{{name}}', name)
+      .replace('{{phone}}', phone)
+      .replace('{{email}}', email)
+      .replace('{{company}}', company)
+      .replace('{{message}}', message)
+
+    await sendEmailPartner(
+      sales,
+      "Partnership email request recieved",
+      "A partnership callback request has been recieved.",
+      htmlContent2
+    );
+    res.status(200).json({ msg: "Request sent to admin successfully!" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Internal server error3" });
+  }
+};
+
+
 
 export const getServiceById = async (req: Request, res: Response) => {
   const userId = req.params.id;

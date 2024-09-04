@@ -1,13 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const authMiddleware_1 = require("../middlewares/authMiddleware");
-const adminMiddleware_1 = require("../middlewares/adminMiddleware");
-const SpaceController_1 = require("../controllers/SpaceController");
+const ServiceControlls_1 = require("../controllers/ServiceControlls");
 const router = (0, express_1.Router)();
-router.post("/", authMiddleware_1.protect, adminMiddleware_1.admin, SpaceController_1.createSpace);
-router.get("/", SpaceController_1.getAllSpaces);
-router.get("/:id", SpaceController_1.getSpaceById);
-router.put("/:id", authMiddleware_1.protect, adminMiddleware_1.admin, SpaceController_1.updateSpace);
-router.delete("/:id", authMiddleware_1.protect, adminMiddleware_1.admin, SpaceController_1.deleteSpace);
+router.post("/sendpartnershipemail", ServiceControlls_1.sendPartnershipEmail);
 exports.default = router;

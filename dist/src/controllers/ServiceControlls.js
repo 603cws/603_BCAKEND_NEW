@@ -1,7 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteServiceById = exports.updateServiceById = exports.createService = exports.getServiceById = exports.getAllService = void 0;
+exports.deleteServiceById = exports.updateServiceById = exports.createService = exports.getServiceById = exports.sendPartnershipEmail = exports.getAllService = void 0;
 const service_model_1 = require("../models/service.model");
+const emailUtils_1 = require("../utils/emailUtils");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 //To get all the Bookings
 const getAllService = async (req, res) => {
     try {
@@ -13,6 +19,27 @@ const getAllService = async (req, res) => {
     }
 };
 exports.getAllService = getAllService;
+const sendPartnershipEmail = async (req, res) => {
+    try {
+        const sales = process.env.EMAIL_SALES || "";
+        const { email, name, phone, company, message } = req.body;
+        const templatePath2 = path_1.default.join(__dirname, '../utils/partner.html');
+        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, 'utf8');
+        const htmlContent2 = htmlTemplate2
+            .replace('{{name}}', name)
+            .replace('{{phone}}', phone)
+            .replace('{{email}}', email)
+            .replace('{{company}}', company)
+            .replace('{{message}}', message);
+        await (0, emailUtils_1.sendEmailPartner)(sales, "Partnership email request recieved", "A partnership callback request has been recieved.", htmlContent2);
+        res.status(200).json({ msg: "Request sent to admin successfully!" });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ msg: "Internal server error3" });
+    }
+};
+exports.sendPartnershipEmail = sendPartnershipEmail;
 const getServiceById = async (req, res) => {
     const userId = req.params.id;
     try {

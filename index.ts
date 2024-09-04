@@ -44,9 +44,7 @@ app.use(cors({
 
 
 app.get("/api/cron", cronHandler);
-
 app.use("/api/v1/services", ServiceRoutes);
-
 app.use("/api/v1/spaces", SpaceRoutes);
 app.use("/api/v1/bookings", BookingRoutes);
 app.use("/api/v1/auth", AuthRoutes);
