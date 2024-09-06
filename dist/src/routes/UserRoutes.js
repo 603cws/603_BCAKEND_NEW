@@ -9,6 +9,7 @@ router.post("/", UserControllers_1.createuser);
 router.get("/", authMiddleware_1.protect, UserControllers_1.getusers);
 router.get("/userdetails", authMiddleware_1.protect, UserControllers_1.getuserdetails);
 router.delete("/:id", authMiddleware_1.protect, UserControllers_1.deleteuser);
+router.post("/forgotpassLink", UserControllers_1.forgotPassword);
 router.put("/changepassword", UserControllers_1.changepasswordbyuser);
 router.put("/updateuser", authMiddleware_1.protect, UserControllers_1.updateuser);
 router.get("/details/dashboard", adminMiddleware_1.admin, UserControllers_1.allusersbyadmin);

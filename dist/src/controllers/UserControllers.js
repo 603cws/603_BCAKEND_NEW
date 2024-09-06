@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
+exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
 const user_model_1 = require("../models/user.model");
 const space_model_1 = require("../models/space.model");
 const types_1 = require("../zodTypes/types");
@@ -290,6 +290,40 @@ const changepasswordbyuser = async (req, res) => {
     }
 };
 exports.changepasswordbyuser = changepasswordbyuser;
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const secretKey = process.env.SECRETKEY;
+    if (!secretKey) {
+        console.error("JWT secret key is not defined");
+        return res.status(500).json({ msg: "JWT secret key is not defined" });
+    }
+    try {
+        const user = await user_model_1.UserModel.findOne({ email: email });
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+        const token = jsonwebtoken_1.default.sign({ n: user.companyName, i: user._id, r: user.role }, // Minimized payload
+        secretKey, // Keep the key secure, consider its length if appropriate
+        { algorithm: 'HS384', expiresIn: '3m' } // Token expires in 3 minutes
+        );
+        const link = `http://localhost:5173/changepassword/${token}`;
+        const templatePath = path_1.default.join(__dirname, '../utils/forgotpass.html');
+        // Read HTML template
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        // Replace placeholders in template
+        const htmlContent = htmlTemplate
+            .replace('{{name}}', email)
+            .replace('{{link}}', link); // Ensure 'link' is used here
+        // Send confirmation email
+        await (0, emailUtils_1.sendEmailAdmin)(email, "Password Reset Request", "Please use the link below to reset your password.", htmlContent);
+        return res.status(200).json({ msg: "Password reset link sent successfully!" });
+    }
+    catch (error) {
+        console.error("Error in forgotPassword function:", error);
+        return res.status(500).json({ msg: "Internal server error" });
+    }
+};
+exports.forgotPassword = forgotPassword;
 // Function to update a user
 const updateuser = async (req, res) => {
     const secretKey = process.env.SECRETKEY;
