@@ -50,7 +50,7 @@ export const createuser = async (req: Request, res: Response) => {
       zipcode,
       location,
       city,
-      creditsleft : monthlycredits,
+      creditsleft: monthlycredits,
       monthlycredits,
       createdAt: Date.now(),
     });
@@ -268,6 +268,8 @@ export const contactus = async (req: Request, res: Response) => {
 
 
 
+
+
 // Function to get all users
 export const getusers = async (req: Request, res: Response) => {
   try {
@@ -381,6 +383,52 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
 };
 
 
+
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const secretKey = process.env.SECRETKEY;
+  if (!secretKey) {
+    console.error("JWT secret key is not defined");
+    return res.status(500).json({ msg: "JWT secret key is not defined" });
+  }
+  try {
+    const user = await UserModel.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const token = jwt.sign(
+      { n: user.companyName, i: user._id, r: user.role },  // Minimized payload
+      secretKey,  // Keep the key secure, consider its length if appropriate
+      { algorithm: 'HS384', expiresIn: '3m' }  // Token expires in 3 minutes
+    );
+
+    const link = `http://localhost:5173/changepassword/${token}`;
+    const templatePath = path.join(__dirname, '../utils/forgotpass.html');
+
+    // Read HTML template
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+
+    // Replace placeholders in template
+    const htmlContent = htmlTemplate
+      .replace('{{name}}', email)
+      .replace('{{link}}', link);  // Ensure 'link' is used here
+
+    // Send confirmation email
+    await sendEmailAdmin(
+      email,
+      "Password Reset Request",
+      "Please use the link below to reset your password.",
+      htmlContent
+    );
+
+    return res.status(200).json({ msg: "Password reset link sent successfully!" });
+  } catch (error) {
+    console.error("Error in forgotPassword function:", error);
+    return res.status(500).json({ msg: "Internal server error" });
+  }
+};
 
 
 
