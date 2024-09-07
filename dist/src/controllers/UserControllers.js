@@ -351,7 +351,7 @@ const forgotPassword = async (req, res) => {
         secretKey, // Keep the key secure, consider its length if appropriate
         { algorithm: 'HS384', expiresIn: '5m' } // Token expires in 3 minutes
         );
-        const link = `http://localhost:5173/changepassword/${token}`;
+        const link = `https://www.603thecoworkingspace.com/changepassword/${token}`;
         const templatePath = path_1.default.join(__dirname, '../utils/forgotpass.html');
         // Read HTML template
         let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');

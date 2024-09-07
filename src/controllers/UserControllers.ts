@@ -422,7 +422,6 @@ export const changeforgotpass = async (req: Request, res: Response) => {
       "Your password has been changed successfully.",
       htmlContent
     );
-
     await user.save();
     res.status(200).json({ msg: "Password changed successfully" });
   } catch (e) {
@@ -461,7 +460,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       { algorithm: 'HS384', expiresIn: '5m' }  // Token expires in 3 minutes
     );
 
-    const link = `http://localhost:5173/changepassword/${token}`;
+    const link = `https://www.603thecoworkingspace.com/changepassword/${token}`;
     const templatePath = path.join(__dirname, '../utils/forgotpass.html');
 
     // Read HTML template
