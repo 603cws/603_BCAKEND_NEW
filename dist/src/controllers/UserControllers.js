@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
+exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changeforgotpass = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
 const user_model_1 = require("../models/user.model");
 const space_model_1 = require("../models/space.model");
 const types_1 = require("../zodTypes/types");
@@ -290,6 +290,51 @@ const changepasswordbyuser = async (req, res) => {
     }
 };
 exports.changepasswordbyuser = changepasswordbyuser;
+const changeforgotpass = async (req, res) => {
+    console.log("djeodjopkpk");
+    const secretKey = process.env.SECRETKEY;
+    if (!secretKey) {
+        console.error("JWT secret key is not defined");
+        return res.status(500).json({ msg: "JWT secret key is not defined" });
+    }
+    const { token, password } = req.body;
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, secretKey);
+        console.log("Decoded token:", decoded);
+        const email = decoded.email;
+        console.log("User email from token:", email);
+        const user = await user_model_1.UserModel.findOne({ email: email });
+        console.log("User from database:", user);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+        const hashedNewPassword = await bcrypt_1.default.hash(password, 10);
+        user.password = hashedNewPassword;
+        const userEmail = user.email;
+        const templatePath = path_1.default.join(__dirname, '../utils/passwordchange.html');
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const companyName = user.companyName;
+        const htmlContent = htmlTemplate.replace('{{name}}', companyName);
+        await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Password Changed Successfully", "Your password has been changed successfully.", htmlContent);
+        await user.save();
+        res.status(200).json({ msg: "Password changed successfully" });
+    }
+    catch (e) {
+        if (e instanceof jsonwebtoken_1.default.TokenExpiredError) {
+            console.error("Token has expired:", e.message);
+            return res.status(401).json({ msg: "Token has expired" });
+        }
+        else if (e instanceof jsonwebtoken_1.default.JsonWebTokenError) {
+            console.error("Invalid token:", e.message);
+            return res.status(401).json({ msg: "Invalid token" });
+        }
+        else {
+            console.error("Error during password change:", e);
+            return res.status(500).json({ msg: "Internal server error" });
+        }
+    }
+};
+exports.changeforgotpass = changeforgotpass;
 const forgotPassword = async (req, res) => {
     const { email } = req.body;
     const secretKey = process.env.SECRETKEY;
@@ -302,9 +347,9 @@ const forgotPassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ msg: "User not found" });
         }
-        const token = jsonwebtoken_1.default.sign({ n: user.companyName, i: user._id, r: user.role }, // Minimized payload
+        const token = jsonwebtoken_1.default.sign({ email: email }, // Minimized payload
         secretKey, // Keep the key secure, consider its length if appropriate
-        { algorithm: 'HS384', expiresIn: '3m' } // Token expires in 3 minutes
+        { algorithm: 'HS384', expiresIn: '5m' } // Token expires in 3 minutes
         );
         const link = `http://localhost:5173/changepassword/${token}`;
         const templatePath = path_1.default.join(__dirname, '../utils/forgotpass.html');

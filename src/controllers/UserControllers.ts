@@ -384,6 +384,63 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
 
 
 
+export const changeforgotpass = async (req: Request, res: Response) => {
+  console.log("djeodjopkpk");
+  const secretKey = process.env.SECRETKEY;
+  if (!secretKey) {
+    console.error("JWT secret key is not defined");
+    return res.status(500).json({ msg: "JWT secret key is not defined" });
+  }
+  const { token, password } = req.body;
+
+  try {
+    const decoded: any = jwt.verify(token, secretKey);
+    console.log("Decoded token:", decoded);
+
+    const email = decoded.email;
+    console.log("User email from token:", email);
+
+    const user = await UserModel.findOne({ email: email });
+    console.log("User from database:", user);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(password, 10);
+    user.password = hashedNewPassword;
+
+    const userEmail = user.email;
+
+    const templatePath = path.join(__dirname, '../utils/passwordchange.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const companyName = user.companyName;
+    const htmlContent = htmlTemplate.replace('{{name}}', companyName);
+
+    await sendEmailAdmin(
+      userEmail,
+      "Password Changed Successfully",
+      "Your password has been changed successfully.",
+      htmlContent
+    );
+
+    await user.save();
+    res.status(200).json({ msg: "Password changed successfully" });
+  } catch (e) {
+    if (e instanceof jwt.TokenExpiredError) {
+      console.error("Token has expired:", e.message);
+      return res.status(401).json({ msg: "Token has expired" });
+    } else if (e instanceof jwt.JsonWebTokenError) {
+      console.error("Invalid token:", e.message);
+      return res.status(401).json({ msg: "Invalid token" });
+    } else {
+      console.error("Error during password change:", e);
+      return res.status(500).json({ msg: "Internal server error" });
+    }
+  }
+};
+
+
+
 
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -399,9 +456,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { n: user.companyName, i: user._id, r: user.role },  // Minimized payload
+      { email: email },  // Minimized payload
       secretKey,  // Keep the key secure, consider its length if appropriate
-      { algorithm: 'HS384', expiresIn: '3m' }  // Token expires in 3 minutes
+      { algorithm: 'HS384', expiresIn: '5m' }  // Token expires in 3 minutes
     );
 
     const link = `http://localhost:5173/changepassword/${token}`;
