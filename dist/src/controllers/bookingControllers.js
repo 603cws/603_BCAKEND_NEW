@@ -3,13 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allbookingbyadmin = exports.deleteBooking = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookings = exports.getlocationbookings = exports.createBooking = void 0;
+exports.allbookingbyadmin = exports.deleteBooking = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = void 0;
 const booking_model_1 = require("../models/booking.model");
 const emailUtils_1 = require("../utils/emailUtils");
 const user_model_1 = require("../models/user.model");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const space_model_1 = require("../models/space.model");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const cookie_1 = __importDefault(require("cookie"));
 // Create a new booking
 const createBooking = async (req, res) => {
     const { startTime, endTime, email, location, date, companyName } = req.body.appointmentDetails;
@@ -127,17 +129,26 @@ const getlocationbookings = async (req, res) => {
 };
 exports.getlocationbookings = getlocationbookings;
 // Get all bookings
-const getAllBookings = async (req, res) => {
+const getAllBookingsbyuser = async (req, res) => {
     try {
-        const bookings = await booking_model_1.BookingModel.find().populate("user space");
+        const secretKey = process.env.SECRETKEY;
+        if (!secretKey) {
+            console.error("JWT secret key is not defined");
+            return res.status(500).json({ msg: "JWT secret key is not defined" });
+        }
+        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        console.log("jsdodckj   ", req.headers);
+        const token = cookies.token;
+        console.log(token);
+        const decoded = jsonwebtoken_1.default.verify(token, secretKey);
+        const bookings = await booking_model_1.BookingModel.find({ user: decoded.id });
         res.status(200).json(bookings);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching bookings", error });
     }
 };
-exports.getAllBookings = getAllBookings;
-// Get booking by ID
+exports.getAllBookingsbyuser = getAllBookingsbyuser;
 const getBookingById = async (req, res) => {
     const bookingId = req.params.id;
     try {

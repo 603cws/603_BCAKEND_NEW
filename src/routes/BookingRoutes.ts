@@ -3,7 +3,7 @@ import { protect } from "../middlewares/authMiddleware";
 import { admin } from "../middlewares/adminMiddleware";
 import {
   createBooking,
-  getAllBookings,
+  getAllBookingsbyuser,
   getBookingById,
   getBookingsByUserId,
   updateBookingStatus,
@@ -17,7 +17,7 @@ const router = Router();
 router.post("/getlocationbookings", protect, getlocationbookings);
 router.get("/admin/getallbookings", admin, allbookingbyadmin);
 router.post("/", protect, createBooking);
-router.get("/", protect, getAllBookings);
+router.get("/getallbookingsbyuser", protect, getAllBookingsbyuser);
 router.get("/:id", protect, getBookingById);
 router.get("/user/:id", protect, getBookingsByUserId);
 router.put("/:id", protect, updateBookingStatus);

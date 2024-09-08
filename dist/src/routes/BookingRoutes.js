@@ -8,7 +8,7 @@ const router = (0, express_1.Router)();
 router.post("/getlocationbookings", authMiddleware_1.protect, bookingControllers_1.getlocationbookings);
 router.get("/admin/getallbookings", adminMiddleware_1.admin, bookingControllers_1.allbookingbyadmin);
 router.post("/", authMiddleware_1.protect, bookingControllers_1.createBooking);
-router.get("/", authMiddleware_1.protect, bookingControllers_1.getAllBookings);
+router.get("/getallbookingsbyuser", authMiddleware_1.protect, bookingControllers_1.getAllBookingsbyuser);
 router.get("/:id", authMiddleware_1.protect, bookingControllers_1.getBookingById);
 router.get("/user/:id", authMiddleware_1.protect, bookingControllers_1.getBookingsByUserId);
 router.put("/:id", authMiddleware_1.protect, bookingControllers_1.updateBookingStatus);

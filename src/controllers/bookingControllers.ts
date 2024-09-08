@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { SpaceModel } from "../models/space.model";
 import jwt from "jsonwebtoken";
+import cookie from "cookie";
 
 
 // Create a new booking
@@ -27,21 +28,18 @@ export const createBooking = async (req: Request, res: Response) => {
     if (!loc) {
       return res.status(404).json({ message: "Location not found" });
     }
-    if(userdet.creditsleft>=credits){
-    userdet.creditsleft -= credits;
-    }else{
+    if (userdet.creditsleft >= credits) {
+      userdet.creditsleft -= credits;
+    } else {
       const a = userdet.creditsleft;
       userdet.creditsleft = 0;
-      userdet.extracredits += credits-a;
+      userdet.extracredits += credits - a;
     }
-
-
-
     const newBooking = new BookingModel({
       user: userdet._id,
       space: loc._id,
       companyName,
-      spaceName : location,
+      spaceName: location,
       location,
       startTime,
       endTime,
@@ -150,18 +148,28 @@ export const getlocationbookings = async (req: Request, res: Response) => {
 
 
 
-
 // Get all bookings
-export const getAllBookings = async (req: Request, res: Response) => {
+export const getAllBookingsbyuser = async (req: Request, res: Response) => {
   try {
-    const bookings = await BookingModel.find().populate("user space");
+    const secretKey = process.env.SECRETKEY;
+    if (!secretKey) {
+      console.error("JWT secret key is not defined");
+      return res.status(500).json({ msg: "JWT secret key is not defined" });
+    }
+    const cookies = cookie.parse(req.headers.cookie || '');
+    console.log("jsdodckj   ", req.headers)
+    const token = cookies.token;
+    console.log(token);
+    const decoded: any = jwt.verify(token, secretKey);
+
+    const bookings = await BookingModel.find({user : decoded.id});
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: "Error fetching bookings", error });
   }
 };
 
-// Get booking by ID
+
 export const getBookingById = async (req: Request, res: Response) => {
   const bookingId = req.params.id;
   try {
