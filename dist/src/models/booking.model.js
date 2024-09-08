@@ -32,6 +32,7 @@ const bookingSchema = new mongoose_1.Schema({
     spaceName: { type: String, required: true },
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },
+    creditsspent: { type: Number, default: 0 }, // Default value set to 0
     date: { type: String, required: true },
     status: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
     paymentMethod: { type: String, enum: ["credits", "credit_card", "paypal", "pending"], default: "pending" },

@@ -46,6 +46,7 @@ const createBooking = async (req, res) => {
             startTime,
             endTime,
             date,
+            creditsspent: credits,
             paymentMethod: "credits",
             status: "confirmed",
         });
