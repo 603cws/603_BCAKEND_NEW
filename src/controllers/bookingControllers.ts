@@ -221,7 +221,7 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
 
 // Delete a booking
 
-export const deleteBooking = async (req: Request, res: Response) => {
+export const deleteBookingbyadmin = async (req: Request, res: Response) => {
   const { id } = req.body; // Extract ID from req.body
   try {
     const deletedBooking = await BookingModel.findByIdAndDelete(id);
@@ -233,6 +233,35 @@ export const deleteBooking = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error deleting booking", error });
   }
 };
+
+
+export const deleteBookingbyuser = async (req: Request, res: Response) => {
+  const {bookingid, isCancellable} = req.body;
+  try {
+    const deletedBooking = await BookingModel.findByIdAndDelete(bookingid);
+    if (!deletedBooking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    if(isCancellable){
+      const user = await UserModel.findById(deletedBooking.user);
+      if(!user){
+        return res.status(404).json({ message: "user not found" });
+      }
+      let a = user?.creditsleft;
+      a += deletedBooking.creditsspent;
+      if(user.monthlycredits <= a){
+        user.creditsleft = user.monthlycredits;
+      }else{
+        user.creditsleft = a;
+      }
+      await user.save();
+    }
+    res.status(200).json({ message: "Booking cancelled successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting booking", error });
+  }
+};
+
 
 
 

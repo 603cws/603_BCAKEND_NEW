@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allbookingbyadmin = exports.deleteBooking = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = void 0;
+exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = void 0;
 const booking_model_1 = require("../models/booking.model");
 const emailUtils_1 = require("../utils/emailUtils");
 const user_model_1 = require("../models/user.model");
@@ -196,7 +196,7 @@ const updateBookingStatus = async (req, res) => {
 };
 exports.updateBookingStatus = updateBookingStatus;
 // Delete a booking
-const deleteBooking = async (req, res) => {
+const deleteBookingbyadmin = async (req, res) => {
     const { id } = req.body; // Extract ID from req.body
     try {
         const deletedBooking = await booking_model_1.BookingModel.findByIdAndDelete(id);
@@ -209,7 +209,36 @@ const deleteBooking = async (req, res) => {
         res.status(500).json({ message: "Error deleting booking", error });
     }
 };
-exports.deleteBooking = deleteBooking;
+exports.deleteBookingbyadmin = deleteBookingbyadmin;
+const deleteBookingbyuser = async (req, res) => {
+    const { bookingid, isCancellable } = req.body;
+    try {
+        const deletedBooking = await booking_model_1.BookingModel.findByIdAndDelete(bookingid);
+        if (!deletedBooking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        if (isCancellable) {
+            const user = await user_model_1.UserModel.findById(deletedBooking.user);
+            if (!user) {
+                return res.status(404).json({ message: "user not found" });
+            }
+            let a = user?.creditsleft;
+            a += deletedBooking.creditsspent;
+            if (user.monthlycredits <= a) {
+                user.creditsleft = user.monthlycredits;
+            }
+            else {
+                user.creditsleft = a;
+            }
+            await user.save();
+        }
+        res.status(200).json({ message: "Booking cancelled successfully!" });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error deleting booking", error });
+    }
+};
+exports.deleteBookingbyuser = deleteBookingbyuser;
 const allbookingbyadmin = async (req, res) => {
     try {
         const allbookings = await booking_model_1.BookingModel.find().sort({ createdAt: -1 });

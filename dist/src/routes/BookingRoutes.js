@@ -12,5 +12,6 @@ router.get("/getallbookingsbyuser", authMiddleware_1.protect, bookingControllers
 router.get("/:id", authMiddleware_1.protect, bookingControllers_1.getBookingById);
 router.get("/user/:id", authMiddleware_1.protect, bookingControllers_1.getBookingsByUserId);
 router.put("/:id", authMiddleware_1.protect, bookingControllers_1.updateBookingStatus);
-router.post("/admin/deletebooking", adminMiddleware_1.admin, bookingControllers_1.deleteBooking);
+router.post("/admin/deletebooking", adminMiddleware_1.admin, bookingControllers_1.deleteBookingbyadmin);
+router.post("/cancelbooking", authMiddleware_1.protect, bookingControllers_1.deleteBookingbyuser);
 exports.default = router;

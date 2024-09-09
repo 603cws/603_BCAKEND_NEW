@@ -7,7 +7,8 @@ import {
   getBookingById,
   getBookingsByUserId,
   updateBookingStatus,
-  deleteBooking,
+  deleteBookingbyadmin,
+  deleteBookingbyuser,
   getlocationbookings,
   allbookingbyadmin
 } from "../controllers/bookingControllers";
@@ -21,7 +22,8 @@ router.get("/getallbookingsbyuser", protect, getAllBookingsbyuser);
 router.get("/:id", protect, getBookingById);
 router.get("/user/:id", protect, getBookingsByUserId);
 router.put("/:id", protect, updateBookingStatus);
-router.post("/admin/deletebooking", admin, deleteBooking);
+router.post("/admin/deletebooking", admin, deleteBookingbyadmin);
+router.post("/cancelbooking", protect, deleteBookingbyuser);
 
 
 export default router;
