@@ -5,7 +5,6 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const adminMiddleware_1 = require("../middlewares/adminMiddleware");
 const SpaceController_1 = require("../controllers/SpaceController");
 const router = (0, express_1.Router)();
-SpaceController_1.getSpacebyname;
 router.post("/", SpaceController_1.createSpace);
 router.post("/getspacebyname", authMiddleware_1.protect, SpaceController_1.getSpacebyname);
 router.get("/", SpaceController_1.getAllSpaces);

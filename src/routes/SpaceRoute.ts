@@ -13,7 +13,6 @@ import {
 const router = Router();
 
 
-getSpacebyname
 router.post("/", createSpace);
 router.post("/getspacebyname", protect, getSpacebyname);
 router.get("/", getAllSpaces);
