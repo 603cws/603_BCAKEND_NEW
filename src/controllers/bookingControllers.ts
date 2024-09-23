@@ -44,7 +44,7 @@ export const createBooking = async (req: Request, res: Response) => {
       startTime,
       endTime,
       date,
-      creditsspent : credits,
+      creditsspent: credits,
       paymentMethod: "credits",
       status: "confirmed",
     });
@@ -163,7 +163,7 @@ export const getAllBookingsbyuser = async (req: Request, res: Response) => {
     console.log(token);
     const decoded: any = jwt.verify(token, secretKey);
 
-    const bookings = await BookingModel.find({user : decoded.id});
+    const bookings = await BookingModel.find({ user: decoded.id });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: "Error fetching bookings", error });
@@ -236,23 +236,25 @@ export const deleteBookingbyadmin = async (req: Request, res: Response) => {
 
 
 export const deleteBookingbyuser = async (req: Request, res: Response) => {
-  const {bookingid, isCancellable} = req.body;
+  const { bookingid, isCancellable, isRefundable } = req.body;
   try {
     const deletedBooking = await BookingModel.findByIdAndDelete(bookingid);
     if (!deletedBooking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-    if(isCancellable){
+    if (isCancellable) {
       const user = await UserModel.findById(deletedBooking.user);
-      if(!user){
+      if (!user) {
         return res.status(404).json({ message: "user not found" });
       }
-      let a = user?.creditsleft;
-      a += deletedBooking.creditsspent;
-      if(user.monthlycredits <= a){
-        user.creditsleft = user.monthlycredits;
-      }else{
-        user.creditsleft = a;
+      if (isRefundable) {
+        let a = user?.creditsleft;
+        a += deletedBooking.creditsspent;
+        if (user.monthlycredits <= a) {
+          user.creditsleft = user.monthlycredits;
+        } else {
+          user.creditsleft = a;
+        }
       }
       await user.save();
     }

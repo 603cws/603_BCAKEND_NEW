@@ -211,7 +211,7 @@ const deleteBookingbyadmin = async (req, res) => {
 };
 exports.deleteBookingbyadmin = deleteBookingbyadmin;
 const deleteBookingbyuser = async (req, res) => {
-    const { bookingid, isCancellable } = req.body;
+    const { bookingid, isCancellable, isRefundable } = req.body;
     try {
         const deletedBooking = await booking_model_1.BookingModel.findByIdAndDelete(bookingid);
         if (!deletedBooking) {
@@ -222,13 +222,15 @@ const deleteBookingbyuser = async (req, res) => {
             if (!user) {
                 return res.status(404).json({ message: "user not found" });
             }
-            let a = user?.creditsleft;
-            a += deletedBooking.creditsspent;
-            if (user.monthlycredits <= a) {
-                user.creditsleft = user.monthlycredits;
-            }
-            else {
-                user.creditsleft = a;
+            if (isRefundable) {
+                let a = user?.creditsleft;
+                a += deletedBooking.creditsspent;
+                if (user.monthlycredits <= a) {
+                    user.creditsleft = user.monthlycredits;
+                }
+                else {
+                    user.creditsleft = a;
+                }
             }
             await user.save();
         }
