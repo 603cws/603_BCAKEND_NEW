@@ -269,11 +269,16 @@ export const deleteBookingbyuser = async (req: Request, res: Response) => {
 
 export const allbookingbyadmin = async (req: Request, res: Response) => {
   try {
+    // Fetch bookings sorted by createdAt in descending order
     const allbookings = await BookingModel.find().sort({ createdAt: -1 });
-
+    
+    // Fetch users with only the _id and extracredits fields
+    const allusers = await UserModel.find({}, { _id: 1, extracredits: 1 });
+    
     return res.status(200).json({
       msg: "bookingdetails",
-      allbookings
+      allbookings,
+      allusers
     });
   } catch (error) {
     console.error(error);

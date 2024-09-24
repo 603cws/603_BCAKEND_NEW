@@ -243,10 +243,14 @@ const deleteBookingbyuser = async (req, res) => {
 exports.deleteBookingbyuser = deleteBookingbyuser;
 const allbookingbyadmin = async (req, res) => {
     try {
+        // Fetch bookings sorted by createdAt in descending order
         const allbookings = await booking_model_1.BookingModel.find().sort({ createdAt: -1 });
+        // Fetch users with only the _id and extracredits fields
+        const allusers = await user_model_1.UserModel.find({}, { _id: 1, extracredits: 1 });
         return res.status(200).json({
             msg: "bookingdetails",
-            allbookings
+            allbookings,
+            allusers
         });
     }
     catch (error) {
