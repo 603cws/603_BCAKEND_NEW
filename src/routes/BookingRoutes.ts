@@ -15,7 +15,7 @@ import {
 
 const router = Router();
 
-router.post("/getlocationbookings", protect, getlocationbookings);
+router.post("/getlocationbookings", getlocationbookings);
 router.get("/admin/getallbookings", admin, allbookingbyadmin);
 router.post("/", protect, createBooking);
 router.get("/getallbookingsbyuser", protect, getAllBookingsbyuser);
