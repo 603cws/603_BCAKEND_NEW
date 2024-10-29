@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import SpaceRoutes from './src/routes/SpaceRoute';
 import creditRoutes from "./src/routes/creditRoute";
 import { cronHandler } from './api/cron'; // Import your cron handler
+import careerRoutes from "./src/routes/careerRoutes"
 
 const app = express();
 app.use(cookieParser());
@@ -49,6 +50,7 @@ app.use("/api/v1/spaces", SpaceRoutes);
 app.use("/api/v1/bookings", BookingRoutes);
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/users", UserRoutes);
+app.use("/api/v1/career", careerRoutes);
 app.use("/api/v1/credits", creditRoutes);
 
 
