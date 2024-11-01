@@ -15,7 +15,8 @@ const sendJobCallBack = async (req, res) => {
         let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
         const a = name;
         const htmlContent = htmlTemplate
-            .replace('{{name}}', a);
+            .replace('{{name}}', a)
+            .replace('{{position}}', position);
         await (0, emailUtils_1.sendCareerEmailCandidate)(email, "Thank You for Applying!", "Your application has been successfully recieved.", htmlContent);
         const templatePath2 = path_1.default.join(__dirname, '../utils/companycareeremail.html');
         let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, 'utf8');

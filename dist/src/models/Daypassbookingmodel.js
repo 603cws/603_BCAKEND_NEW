@@ -23,15 +23,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SpaceModel = void 0;
+exports.DayPass = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const spaceSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    roomtype: { type: String, enum: ["conference", "meeting", "daypass"] },
-    location: { type: String, required: true },
-    description: { type: String },
-    amenities: { type: [String] },
-    capacity: { type: Number, required: true },
+const DayPassSchema = new mongoose_1.Schema({
+    space: { type: mongoose_1.Schema.Types.ObjectId, ref: "Space", required: true },
+    companyName: { type: String, required: true },
+    email: { type: String, required: true },
+    spaceName: { type: String, required: true },
+    phone: { type: Number, required: true },
+    bookeddate: { type: String, required: true },
+    day: { type: Number, required: true },
+    month: { type: Number, required: true },
+    year: { type: Number, required: true },
+    status: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
+    paymentMethod: { type: String, enum: ["credit_card", "paypal", "pending"], default: "pending" },
     createdAt: { type: Date, default: Date.now }
 });
-exports.SpaceModel = mongoose_1.default.model('Space', spaceSchema);
+exports.DayPass = mongoose_1.default.model("DayPass", DayPassSchema);
