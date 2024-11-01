@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 // Space Schema
 interface SpaceInterface extends Document {
     name: string;
-    roomtype: "conference" | "meeting";
+    roomtype: "conference" | "meeting" | "daypass";
     location: string;
     description?: string;
     amenities?: string[];
@@ -13,7 +13,7 @@ interface SpaceInterface extends Document {
 
 const spaceSchema: Schema = new Schema<SpaceInterface>({
     name: { type: String, required: true },
-    roomtype: { type: String, enum: ["conference", "meeting"] },
+    roomtype: { type: String, enum: ["conference", "meeting", "daypass"] },
     location: { type: String, required: true },
     description: { type: String },
     amenities: { type: [String] },

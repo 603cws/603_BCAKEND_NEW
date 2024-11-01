@@ -200,3 +200,37 @@ export const sendEmailPartner = async (to: string, subject: string, text: string
     throw error;
   }
 };
+
+
+
+export const sendEventEmail = async (to: string, subject: string, text: string, html: string) => {
+  console.log("Sending email to:", to);
+  console.log("Email subject:", subject);
+  console.log("Email text:", text);
+
+  let transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_ADMIN,
+      pass: process.env.ADMIN_SALES,
+    },
+  });
+
+  let mailOptions = {
+    from: process.env.EMAIL_ADMIN,
+    to,
+    subject,
+    text,
+    html,
+  };
+
+  try {
+    let info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: %s", info.messageId);
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
+};
