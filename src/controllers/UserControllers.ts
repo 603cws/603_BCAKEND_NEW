@@ -8,11 +8,7 @@ import bcrypt from "bcrypt";
 import { sendEmailAdmin, sendEmailSales } from "../utils/emailUtils";
 import cookie from "cookie";
 import path from "path";
-import fs from 'fs';
-
-
-
-
+import fs from "fs";
 
 export const createuser = async (req: Request, res: Response) => {
   const body = req.body;
@@ -23,7 +19,19 @@ export const createuser = async (req: Request, res: Response) => {
   }
 
   try {
-    const { companyName, email, password, phone, username, country, state, zipcode, city, monthlycredits, location } = body;
+    const {
+      companyName,
+      email,
+      password,
+      phone,
+      username,
+      country,
+      state,
+      zipcode,
+      city,
+      monthlycredits,
+      location,
+    } = body;
 
     const usernameExists = await UserModel.findOne({ username });
     if (usernameExists) {
@@ -61,18 +69,18 @@ export const createuser = async (req: Request, res: Response) => {
       return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
 
-    const token = jwt.sign({ id: user._id, companyName }, secretKey, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, companyName }, secretKey, {
+      expiresIn: "1h",
+    });
 
-    return res.status(201).json({ msg: "User created", jwt: token, user: user.companyName });
+    return res
+      .status(201)
+      .json({ msg: "User created", jwt: token, user: user.companyName });
   } catch (e) {
     console.error(e);
     res.status(500).json({ msg: "Internal server error1" });
   }
 };
-
-
-
-
 
 // Get user's details
 export const getuserdetailsorig = async (req: Request, res: Response) => {
@@ -83,8 +91,8 @@ export const getuserdetailsorig = async (req: Request, res: Response) => {
   }
 
   try {
-    const cookies = cookie.parse(req.headers.cookie || '');
-    console.log("jsdodckj   ", req.headers)
+    const cookies = cookie.parse(req.headers.cookie || "");
+    console.log("jsdodckj   ", req.headers);
     const token = cookies.token;
     console.log(token);
 
@@ -105,7 +113,6 @@ export const getuserdetailsorig = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getuserdetails = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
@@ -114,8 +121,8 @@ export const getuserdetails = async (req: Request, res: Response) => {
   }
 
   try {
-    const cookies = cookie.parse(req.headers.cookie || '');
-    console.log("jsdodckj   ", req.headers)
+    const cookies = cookie.parse(req.headers.cookie || "");
+    console.log("jsdodckj   ", req.headers);
     const token = cookies.token;
     console.log(token);
     if (!token) {
@@ -142,11 +149,9 @@ export const getuserdetails = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const checkauth = async (req: Request, res: Response) => {
   try {
-    const cookies = cookie.parse(req.headers.cookie || '');
+    const cookies = cookie.parse(req.headers.cookie || "");
     const token = cookies.token;
     const secretKey = process.env.SECRETKEY;
 
@@ -163,27 +168,24 @@ export const checkauth = async (req: Request, res: Response) => {
 
     // Assuming user.role is the role you want to check
     return res.status(200).json({ auth: true, user: decoded.role });
-
   } catch (error) {
     console.error("Error in authentication:", error);
-    res.status(500).json({ msg: "Internal server error", auth: false, user: "user" });
+    res
+      .status(500)
+      .json({ msg: "Internal server error", auth: false, user: "user" });
   }
 };
-
-
-
 
 export const sendcallback = async (req: Request, res: Response) => {
   try {
     const sales = process.env.EMAIL_SALES || "";
     const { email, name, phone, company, requirements } = req.body;
 
-    const templatePath = path.join(__dirname, '../utils/callbackuser.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const templatePath = path.join(__dirname, "../utils/callbackuser.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
     const a = name;
-    const htmlContent = htmlTemplate
-      .replace('{{name}}', a)
+    const htmlContent = htmlTemplate.replace("{{name}}", a);
 
     await sendEmailSales(
       email,
@@ -192,16 +194,15 @@ export const sendcallback = async (req: Request, res: Response) => {
       htmlContent
     );
 
-    const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
-    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
-
+    const templatePath2 = path.join(__dirname, "../utils/callbackadmin.html");
+    let htmlTemplate2 = fs.readFileSync(templatePath2, "utf8");
 
     const htmlContent2 = htmlTemplate2
-      .replace('{{name}}', a)
-      .replace('{{phone}}', phone)
-      .replace('{{email}}', email)
-      .replace('{{company}}', company)
-      .replace('{{requirements}}', requirements)
+      .replace("{{name}}", a)
+      .replace("{{phone}}", phone)
+      .replace("{{email}}", email)
+      .replace("{{company}}", company)
+      .replace("{{requirements}}", requirements);
 
     await sendEmailSales(
       sales,
@@ -210,26 +211,34 @@ export const sendcallback = async (req: Request, res: Response) => {
       htmlContent2
     );
 
-    res.status(200).json({ msg: "Request sent to both user and admin successfully!" });
+    res
+      .status(200)
+      .json({ msg: "Request sent to both user and admin successfully!" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "Internal server error3" });
   }
 };
 
-
-
 export const contactus = async (req: Request, res: Response) => {
   try {
     const sales = process.env.EMAIL_SALES || "";
-    const { name, phone, email, location, seats, company, specifications, requirements } = req.body;
+    const {
+      name,
+      phone,
+      email,
+      location,
+      seats,
+      company,
+      specifications,
+      requirements,
+    } = req.body;
 
-    const templatePath = path.join(__dirname, '../utils/contactus.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const templatePath = path.join(__dirname, "../utils/contactus.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
     const a = name;
-    const htmlContent = htmlTemplate
-      .replace('{{name}}', a)
+    const htmlContent = htmlTemplate.replace("{{name}}", a);
 
     await sendEmailSales(
       email,
@@ -238,19 +247,18 @@ export const contactus = async (req: Request, res: Response) => {
       htmlContent
     );
 
-    const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
-    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
+    const templatePath2 = path.join(__dirname, "../utils/callbackadmin.html");
+    let htmlTemplate2 = fs.readFileSync(templatePath2, "utf8");
 
     const htmlContent2 = htmlTemplate2
-      .replace('{{name}}', a)
-      .replace('{{phone}}', phone)
-      .replace('{{email}}', email)
-      .replace('{{pref}}', location)
-      .replace('{{company}}', company)
-      .replace('{{seats}}', seats)
-      .replace('{{Specifications}}', specifications)
-      .replace('{{requirements}}', requirements)
-
+      .replace("{{name}}", a)
+      .replace("{{phone}}", phone)
+      .replace("{{email}}", email)
+      .replace("{{pref}}", location)
+      .replace("{{company}}", company)
+      .replace("{{seats}}", seats)
+      .replace("{{Specifications}}", specifications)
+      .replace("{{requirements}}", requirements);
 
     await sendEmailSales(
       sales,
@@ -259,16 +267,14 @@ export const contactus = async (req: Request, res: Response) => {
       htmlContent2
     );
 
-    res.status(200).json({ msg: "Request sent to both user and admin successfully!" });
+    res
+      .status(200)
+      .json({ msg: "Request sent to both user and admin successfully!" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "Internal server error3" });
   }
 };
-
-
-
-
 
 // Function to get all users
 export const getusers = async (req: Request, res: Response) => {
@@ -279,10 +285,6 @@ export const getusers = async (req: Request, res: Response) => {
     res.status(500).json({ msg: "Internal server error3" });
   }
 };
-
-
-
-
 
 // Function to get user info by ID
 export const userbyid = async (req: Request, res: Response) => {
@@ -297,10 +299,6 @@ export const userbyid = async (req: Request, res: Response) => {
     res.status(500).json({ msg: "Internal server error4edoj" });
   }
 };
-
-
-
-
 
 // Function to delete a user
 export const deleteuser = async (req: Request, res: Response) => {
@@ -317,10 +315,6 @@ export const deleteuser = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-
 // Function to change password by user
 export const changepasswordbyuser = async (req: Request, res: Response) => {
   console.log("djeodjopkpk");
@@ -329,8 +323,8 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
     console.error("JWT secret key is not defined");
     return res.status(500).json({ msg: "JWT secret key is not defined" });
   }
-  const cookies = cookie.parse(req.headers.cookie || '');
-  console.log("jsdodckj   ", req.headers)
+  const cookies = cookie.parse(req.headers.cookie || "");
+  console.log("jsdodckj   ", req.headers);
   const token = cookies.token;
   console.log(token);
   const { newPassword, oldPassword } = req.body;
@@ -359,11 +353,10 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
     const userEmail = user.email;
 
     // Read HTML template from file
-    const templatePath = path.join(__dirname, '../utils/passwordchange.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const templatePath = path.join(__dirname, "../utils/passwordchange.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
     const a = user.companyName;
-    const htmlContent = htmlTemplate
-      .replace('{{name}}', a);
+    const htmlContent = htmlTemplate.replace("{{name}}", a);
 
     // Send confirmation email
     await sendEmailAdmin(
@@ -373,7 +366,6 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
       htmlContent
     );
 
-
     await user.save();
     res.status(200).json({ msg: "Password changed successfully" });
   } catch (e) {
@@ -381,8 +373,6 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
     res.status(500).json({ msg: "Internal server error6" });
   }
 };
-
-
 
 export const changeforgotpass = async (req: Request, res: Response) => {
   console.log("djeodjopkpk");
@@ -411,10 +401,10 @@ export const changeforgotpass = async (req: Request, res: Response) => {
 
     const userEmail = user.email;
 
-    const templatePath = path.join(__dirname, '../utils/passwordchange.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const templatePath = path.join(__dirname, "../utils/passwordchange.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
     const companyName = user.companyName;
-    const htmlContent = htmlTemplate.replace('{{name}}', companyName);
+    const htmlContent = htmlTemplate.replace("{{name}}", companyName);
 
     await sendEmailAdmin(
       userEmail,
@@ -438,9 +428,6 @@ export const changeforgotpass = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
   const secretKey = process.env.SECRETKEY;
@@ -455,21 +442,21 @@ export const forgotPassword = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { email: email },  // Minimized payload
-      secretKey,  // Keep the key secure, consider its length if appropriate
-      { algorithm: 'HS384', expiresIn: '5m' }  // Token expires in 3 minutes
+      { email: email }, // Minimized payload
+      secretKey, // Keep the key secure, consider its length if appropriate
+      { algorithm: "HS384", expiresIn: "5m" } // Token expires in 3 minutes
     );
 
     const link = `https://www.603thecoworkingspace.com/changepassword/${token}`;
-    const templatePath = path.join(__dirname, '../utils/forgotpass.html');
+    const templatePath = path.join(__dirname, "../utils/forgotpass.html");
 
     // Read HTML template
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
     // Replace placeholders in template
     const htmlContent = htmlTemplate
-      .replace('{{name}}', email)
-      .replace('{{link}}', link);  // Ensure 'link' is used here
+      .replace("{{name}}", email)
+      .replace("{{link}}", link); // Ensure 'link' is used here
 
     // Send confirmation email
     await sendEmailAdmin(
@@ -479,15 +466,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
       htmlContent
     );
 
-    return res.status(200).json({ msg: "Password reset link sent successfully!" });
+    return res
+      .status(200)
+      .json({ msg: "Password reset link sent successfully!" });
   } catch (error) {
     console.error("Error in forgotPassword function:", error);
     return res.status(500).json({ msg: "Internal server error" });
   }
 };
-
-
-
 
 // Function to update a user
 export const updateuser = async (req: Request, res: Response) => {
@@ -497,8 +483,8 @@ export const updateuser = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "JWT secret key is not defined" });
   }
   try {
-    const cookies = cookie.parse(req.headers.cookie || '');
-    console.log("jsdodckj   ", req.headers)
+    const cookies = cookie.parse(req.headers.cookie || "");
+    console.log("jsdodckj   ", req.headers);
     const token = cookies.token;
     console.log(token);
     const { companyName, country, state, city, zipCode } = req.body;
@@ -524,8 +510,6 @@ export const updateuser = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const updateuserbyadmin = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
@@ -533,7 +517,18 @@ export const updateuserbyadmin = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "JWT secret key is not defined" });
   }
   try {
-    const { companyName, location, kyc, phone, email, role, monthlycredits, extracredits, creditsleft, id } = req.body;
+    const {
+      companyName,
+      location,
+      kyc,
+      phone,
+      email,
+      role,
+      monthlycredits,
+      extracredits,
+      creditsleft,
+      id,
+    } = req.body;
     const user = await UserModel.findById(id);
 
     if (!user) {
@@ -545,10 +540,10 @@ export const updateuserbyadmin = async (req: Request, res: Response) => {
     user.phone = phone;
     user.kyc = kyc;
     user.monthlycredits = monthlycredits;
-    user.creditsleft = creditsleft
-    user.location = location
-    user.extracredits = extracredits
-    user.role = role
+    user.creditsleft = creditsleft;
+    user.location = location;
+    user.extracredits = extracredits;
+    user.role = role;
 
     await user.save();
 
@@ -558,8 +553,6 @@ export const updateuserbyadmin = async (req: Request, res: Response) => {
     res.status(500).json({ msg: "Internal server error26" });
   }
 };
-
-
 
 export const deleteuserbyadmin = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
@@ -582,12 +575,14 @@ export const deleteuserbyadmin = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const allusersbyadmin = async (req: Request, res: Response) => {
   try {
-    const totalUsers = await UserModel.find({ role: "user" }).sort({ createdAt: -1 });
-    const totaladmin = await UserModel.find({ role: "admin" }).sort({ createdAt: -1 });
+    const totalUsers = await UserModel.find({ role: "user" }).sort({
+      createdAt: -1,
+    });
+    const totaladmin = await UserModel.find({ role: "admin" }).sort({
+      createdAt: -1,
+    });
 
     const allworkspaces = await SpaceModel.find().sort({ createdAt: -1 });
 
@@ -595,7 +590,7 @@ export const allusersbyadmin = async (req: Request, res: Response) => {
       msg: "details",
       totalUsers,
       totaladmin,
-      allworkspaces
+      allworkspaces,
     });
   } catch (error) {
     console.error(error);
@@ -603,14 +598,18 @@ export const allusersbyadmin = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-
-
 // Function to complete KYC for a user
 export const dokyc = async (req: Request, res: Response) => {
-  const { user, firstname, lastname, phone, address, pancard, aadhar, companyname } = req.body;
+  const {
+    user,
+    firstname,
+    lastname,
+    phone,
+    address,
+    pancard,
+    aadhar,
+    companyname,
+  } = req.body;
   try {
     await kycmodel.create({
       user,

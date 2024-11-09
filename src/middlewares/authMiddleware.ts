@@ -1,16 +1,21 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
+import { log } from "console";
 
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const cookies = cookie.parse(req.headers.cookie || '');
+    const cookies = cookie.parse(req.headers.cookie || "");
     const token = cookies.token;
     console.log("token value for det", token);
-    console.log(req.headers)
+    console.log(req.headers);
     if (!token) {
       return res.status(401).json({
-        msg: "No token provided, unauthorized12345667"
+        msg: "No token provided, unauthorized12345667",
       });
     }
 
@@ -20,7 +25,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       next();
     } else {
       return res.status(401).json({
-        msg: "Unauthorized"
+        msg: "Unauthorized",
       });
     }
   } catch (error) {
@@ -28,7 +33,8 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     console.error("Token verification error:", error);
     return res.status(401).json({
       msg: "Unauthorized",
-      error: error instanceof Error ? error.message : 'Token verification failed'
+      error:
+        error instanceof Error ? error.message : "Token verification failed",
     });
   }
 };

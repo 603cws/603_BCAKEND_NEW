@@ -2,17 +2,71 @@ import { Request, Response } from "express";
 import { BookingModel } from "../models/booking.model";
 import { sendEmailAdmin } from "../utils/emailUtils";
 import { UserModel } from "../models/user.model";
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 import { SpaceModel } from "../models/space.model";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
 
+//convert time to 24hr basis
+function timeTo24Hours(timeStr: string): string {
+  const [time, modifier] = timeStr.split(" ");
+  let [hours, minutes] = time.split(":");
+
+  if (modifier === "pm" && hours !== "12") {
+    hours = (parseInt(hours, 10) + 12).toString();
+  } else if (modifier === "am" && hours === "12") {
+    hours = "00";
+  }
+
+  return `${hours}:${minutes}`;
+}
+
+//check time overlap function
+function checkTimeOverlap(
+  documents: any,
+  inputStartTime: string,
+  inputEndTime: string
+) {
+  // Convert input times to 24-hour format for comparison
+  const inputStart = timeTo24Hours(inputStartTime);
+  const inputEnd = timeTo24Hours(inputEndTime);
+
+  for (let doc of documents) {
+    // Convert document start and end times to 24-hour format
+    const docStart = timeTo24Hours(doc.startTime);
+    const docEnd = timeTo24Hours(doc.endTime);
+
+    // Check for overlap
+    if (
+      inputStart < docEnd &&
+      inputEnd > docStart // General time overlap condition
+    ) {
+      return true; // Overlap found
+    }
+  }
+
+  return false; // No overlap found
+}
 
 // Create a new booking
 export const createBooking = async (req: Request, res: Response) => {
-  const { startTime, endTime, email, location, date, companyName } = req.body.appointmentDetails;
+  const { startTime, endTime, email, location, date, companyName } =
+    req.body.appointmentDetails;
   const { credits } = req.body;
+
+  //get all the booking for same date
+
+  const bookingDetails = await BookingModel.find({
+    date: date,
+    spaceName: location,
+  });
+
+  console.log(bookingDetails);
+
+  const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
+
+  console.log(isoverlap);
 
   try {
     if (!email) {
@@ -21,6 +75,11 @@ export const createBooking = async (req: Request, res: Response) => {
     const userdet = await UserModel.findOne({ email: email });
     if (!userdet) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    //check if already booking exist
+    if (isoverlap) {
+      return res.status(404).json({ message: "Already booked" });
     }
 
     // Find the location
@@ -59,25 +118,26 @@ export const createBooking = async (req: Request, res: Response) => {
     const userEmail = userdet.email;
 
     // Read HTML template from file
-    const templatePath = path.join(__dirname, '../utils/email.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const templatePath = path.join(__dirname, "../utils/email.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
     // Replace placeholders with actual values
     const a = userdet.companyName;
     const htmlContent = htmlTemplate
-      .replace('{{name}}', a)
-      .replace('{{startTime}}', startTime)
-      .replace('{{endTime}}', endTime)
-      .replace('{{place}}', location)
-      .replace('{{date}}', date)
+      .replace("{{name}}", a)
+      .replace("{{startTime}}", startTime)
+      .replace("{{endTime}}", endTime)
+      .replace("{{place}}", location)
+      .replace("{{date}}", date);
 
     // Send confirmation email
-    await sendEmailAdmin(
-      userEmail,
-      "Booking Confirmation",
-      "Your room booking at 603 Coworking Space has been successfully confirmed.",
-      htmlContent
-    );
+
+    // await sendEmailAdmin(
+    //   userEmail,
+    //   "Booking Confirmation",
+    //   "Your room booking at 603 Coworking Space has been successfully confirmed.",
+    //   htmlContent
+    // );
 
     res.status(201).json(newBooking);
   } catch (error) {
@@ -85,8 +145,6 @@ export const createBooking = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error creating booking", error });
   }
 };
-
-
 
 //get only specified location bookings
 export const getlocationbookings = async (req: Request, res: Response) => {
@@ -107,19 +165,27 @@ export const getlocationbookings = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Location not found" });
     }
 
-    const bookings = await BookingModel.find({ date: selectedDate, space: location._id });
+    const bookings = await BookingModel.find({
+      date: selectedDate,
+      space: location._id,
+    });
     if (bookings.length != 0) {
-      let arr: [string, string][] = bookings.map(a => [a.startTime, a.endTime]);
+      let arr: [string, string][] = bookings.map((a) => [
+        a.startTime,
+        a.endTime,
+      ]);
 
       const convertToTime = (time: string): Date => {
-        const [hourMinute, period] = time.split(' ');
-        let [hour, minute] = hourMinute.split(':').map(Number);
-        if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12;
-        if (period.toLowerCase() === 'am' && hour === 12) hour = 0;
+        const [hourMinute, period] = time.split(" ");
+        let [hour, minute] = hourMinute.split(":").map(Number);
+        if (period.toLowerCase() === "pm" && hour !== 12) hour += 12;
+        if (period.toLowerCase() === "am" && hour === 12) hour = 0;
         return new Date(0, 0, 0, hour, minute);
       };
 
-      arr.sort((a, b) => convertToTime(a[0]).getTime() - convertToTime(b[0]).getTime());
+      arr.sort(
+        (a, b) => convertToTime(a[0]).getTime() - convertToTime(b[0]).getTime()
+      );
       const merged: [string, string][] = [];
       let [currentStart, currentEnd] = arr[0];
 
@@ -127,7 +193,10 @@ export const getlocationbookings = async (req: Request, res: Response) => {
         let [nextStart, nextEnd] = arr[i];
 
         if (convertToTime(nextStart) <= convertToTime(currentEnd)) {
-          currentEnd = convertToTime(nextEnd) > convertToTime(currentEnd) ? nextEnd : currentEnd;
+          currentEnd =
+            convertToTime(nextEnd) > convertToTime(currentEnd)
+              ? nextEnd
+              : currentEnd;
         } else {
           merged.push([currentStart, currentEnd]);
           [currentStart, currentEnd] = [nextStart, nextEnd];
@@ -145,10 +214,6 @@ export const getlocationbookings = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-
 // Get all bookings
 export const getAllBookingsbyuser = async (req: Request, res: Response) => {
   try {
@@ -157,8 +222,8 @@ export const getAllBookingsbyuser = async (req: Request, res: Response) => {
       console.error("JWT secret key is not defined");
       return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
-    const cookies = cookie.parse(req.headers.cookie || '');
-    console.log("jsdodckj   ", req.headers)
+    const cookies = cookie.parse(req.headers.cookie || "");
+    console.log("jsdodckj   ", req.headers);
     const token = cookies.token;
     console.log(token);
     const decoded: any = jwt.verify(token, secretKey);
@@ -170,11 +235,12 @@ export const getAllBookingsbyuser = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getBookingById = async (req: Request, res: Response) => {
   const bookingId = req.params.id;
   try {
-    const booking = await BookingModel.findById(bookingId).populate("user space");
+    const booking = await BookingModel.findById(bookingId).populate(
+      "user space"
+    );
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
@@ -188,13 +254,17 @@ export const getBookingById = async (req: Request, res: Response) => {
 export const getBookingsByUserId = async (req: Request, res: Response) => {
   const userId = req.params.id;
   try {
-    const bookings = await BookingModel.find({ user: userId }).populate("space");
+    const bookings = await BookingModel.find({ user: userId }).populate(
+      "space"
+    );
     if (!bookings) {
       return res.status(404).json({ message: "Bookings not found" });
     }
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching bookings by user ID", error });
+    res
+      .status(500)
+      .json({ message: "Error fetching bookings by user ID", error });
   }
 };
 
@@ -234,7 +304,6 @@ export const deleteBookingbyadmin = async (req: Request, res: Response) => {
   }
 };
 
-
 export const deleteBookingbyuser = async (req: Request, res: Response) => {
   const { bookingid, isCancellable, isRefundable } = req.body;
   try {
@@ -264,21 +333,18 @@ export const deleteBookingbyuser = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
 export const allbookingbyadmin = async (req: Request, res: Response) => {
   try {
     // Fetch bookings sorted by createdAt in descending order
     const allbookings = await BookingModel.find().sort({ createdAt: -1 });
-    
+
     // Fetch users with only the _id and extracredits fields
     const allusers = await UserModel.find({}, { _id: 1, extracredits: 1 });
-    
+
     return res.status(200).json({
       msg: "bookingdetails",
       allbookings,
-      allusers
+      allusers,
     });
   } catch (error) {
     console.error(error);
