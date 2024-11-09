@@ -132,12 +132,12 @@ export const createBooking = async (req: Request, res: Response) => {
 
     // Send confirmation email
 
-    // await sendEmailAdmin(
-    //   userEmail,
-    //   "Booking Confirmation",
-    //   "Your room booking at 603 Coworking Space has been successfully confirmed.",
-    //   htmlContent
-    // );
+    await sendEmailAdmin(
+      userEmail,
+      "Booking Confirmation",
+      "Your room booking at 603 Coworking Space has been successfully confirmed.",
+      htmlContent
+    );
 
     res.status(201).json(newBooking);
   } catch (error) {
