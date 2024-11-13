@@ -12,11 +12,32 @@ import creditRoutes from "./src/routes/creditRoute";
 import { cronHandler } from "./api/cron"; // Import your cron handler
 import careerRoutes from "./src/routes/careerRoutes";
 import daypassroutes from "./src/routes/DayPassRoute";
+
+//import order route
+import orderRoutes from "./src/routes/OrderRoutes";
+
+//morgan
 const morgan = require("morgan");
+
+//helmet
+const helmet = require("helmet");
+
+//rate limiter
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use(helmet());
+
+//limit request from same api
+const limiter = rateLimit({
+  max: 100, //100 req per hour
+  windowMs: 15 * 60 * 1000,
+  message: "Too many requests from this IP,please try again in an hour",
+});
+app.use("/api", limiter);
+
 const port = process.env.PORT || 3000;
 
 // dotenv.config({ path: "backend/.env" });
@@ -32,7 +53,6 @@ allowedOrigins = [
   "https://603-cws-frontend.vercel.app",
   "https://603coworkingspace-piyush-joshis-projects.vercel.app",
   "http://localhost:5173",
-  "http://localhost:3001",
 ];
 
 app.use(
@@ -58,6 +78,9 @@ app.use("/api/v1/users", UserRoutes);
 app.use("/api/v1/career", careerRoutes);
 app.use("/api/v1/credits", creditRoutes);
 app.use("/api/v1/daypass", daypassroutes);
+
+//payment route
+app.use("/api/v1/order", orderRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   console.log("Root URL accessed");

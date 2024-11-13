@@ -49,6 +49,26 @@ function checkTimeOverlap(
   return false; // No overlap found
 }
 
+//check booking available
+export const checkBookingAvailable = async (req: Request, res: Response) => {
+  const { startTime, endTime, location, date } = req.body.appointmentDetails;
+  //get all the booking for same date
+  const bookingDetails = await BookingModel.find({
+    date: date,
+    spaceName: location,
+  });
+
+  //check is it overlaping with somebooking
+  const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
+
+  //check if already booking exist
+  if (isoverlap) {
+    return res
+      .status(404)
+      .json({ message: "booking aleady exist on this time range" });
+  }
+};
+
 // Create a new booking
 export const createBooking = async (req: Request, res: Response) => {
   const { startTime, endTime, email, location, date, companyName } =
@@ -56,17 +76,15 @@ export const createBooking = async (req: Request, res: Response) => {
   const { credits } = req.body;
 
   //get all the booking for same date
-
   const bookingDetails = await BookingModel.find({
     date: date,
     spaceName: location,
   });
 
-  console.log(bookingDetails);
-
+  // console.log(bookingDetails);
   const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
 
-  console.log(isoverlap);
+  // console.log(isoverlap);
 
   try {
     if (!email) {
@@ -79,7 +97,9 @@ export const createBooking = async (req: Request, res: Response) => {
 
     //check if already booking exist
     if (isoverlap) {
-      return res.status(404).json({ message: "Already booked" });
+      return res
+        .status(404)
+        .json({ message: "booking aleady exist on this time range" });
     }
 
     // Find the location
@@ -328,6 +348,8 @@ export const deleteBookingbyuser = async (req: Request, res: Response) => {
       await user.save();
     }
     res.status(200).json({ message: "Booking cancelled successfully!" });
+
+    //send a cancel booking email
   } catch (error) {
     res.status(500).json({ message: "Error deleting booking", error });
   }
