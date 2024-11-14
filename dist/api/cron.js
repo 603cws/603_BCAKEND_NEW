@@ -17,12 +17,14 @@ async function cronHandler(req, res) {
     console.log("cron connected");
     try {
         console.log("Cron job executed at:", new Date().toISOString());
-        const result = await user_model_1.UserModel.updateMany({}, [{ $set: { creditsleft: { $toDouble: "$monthlycredits" } } }]);
+        const result = await user_model_1.UserModel.updateMany({}, [
+            { $set: { creditsleft: { $toDouble: "$monthlycredits" } } },
+        ]);
         console.log(`Matched ${result.matchedCount} documents and modified ${result.modifiedCount} documents`);
-        res.status(200).json({ message: 'Cron job executed successfully' });
+        res.status(200).json({ message: "Cron job executed successfully" });
     }
     catch (error) {
-        console.error('Error executing cron job:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        console.error("Error executing cron job:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }

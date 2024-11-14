@@ -8,12 +8,13 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cookie_1 = __importDefault(require("cookie"));
 const admin = async (req, res, next) => {
     try {
-        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        const cookies = cookie_1.default.parse(req.headers.cookie || "");
+        console.log("cookie", req.headers.cookie);
         const token = cookies.token;
         console.log("token value for det", token);
         if (!token) {
             return res.status(401).json({
-                msg: "No token provided, unauthorized12345"
+                msg: "No token provided, unauthorized12345",
             });
         }
         // Verify the token

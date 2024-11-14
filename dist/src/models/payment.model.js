@@ -26,11 +26,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const paymentSchema = new mongoose_1.Schema({
-    user: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    booking: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Booking', required: true },
+    user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    booking: { type: mongoose_1.Schema.Types.ObjectId, ref: "Booking", required: true },
     amount: { type: Number, required: true },
-    paymentMethod: { type: String, enum: ['credit_card', 'paypal', 'bank_transfer'], required: true },
-    status: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
-    createdAt: { type: Date, default: Date.now }
+    paymentMethod: {
+        type: String,
+        enum: ["card", "paypal", "bank_transfer", "upi", "netbanking"],
+        required: true,
+    },
+    status: {
+        type: String,
+        enum: ["pending", "completed", "failed", "authorized", "success"],
+        default: "pending",
+    },
+    createdAt: { type: Date, default: Date.now },
 });
-exports.PaymentModel = mongoose_1.default.model('Payment', paymentSchema);
+exports.PaymentModel = mongoose_1.default.model("Payment", paymentSchema);
