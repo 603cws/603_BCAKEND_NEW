@@ -65,9 +65,11 @@ const razorpay = new Razorpay({
 // Route to handle order creation
 const createOrder = async (req, res) => {
     try {
+        console.log("enter the api");
         const options = req.body;
         const order = await razorpay.orders.create(options);
         console.log(order);
+        // const order = false;
         if (!order) {
             return res.status(500).json({ message: "error" });
         }
@@ -75,7 +77,10 @@ const createOrder = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        res.status(500).send("error");
+        res.status(500).json({
+            message: "error",
+            error,
+        });
     }
 };
 exports.createOrder = createOrder;
