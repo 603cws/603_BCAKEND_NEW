@@ -21,7 +21,7 @@ const createuser = async (req, res) => {
         return res.status(400).json({ msg: "Invalid Inputs" });
     }
     try {
-        const { companyName, email, password, phone, username, country, state, zipcode, city, monthlycredits, location } = body;
+        const { companyName, email, password, phone, username, country, state, zipcode, city, monthlycredits, location, } = body;
         const usernameExists = await user_model_1.UserModel.findOne({ username });
         if (usernameExists) {
             return res.status(409).json({ msg: "Username exists" });
@@ -54,8 +54,12 @@ const createuser = async (req, res) => {
             console.error("JWT secret key is not defined");
             return res.status(500).json({ msg: "JWT secret key is not defined" });
         }
-        const token = jsonwebtoken_1.default.sign({ id: user._id, companyName }, secretKey, { expiresIn: '1h' });
-        return res.status(201).json({ msg: "User created", jwt: token, user: user.companyName });
+        const token = jsonwebtoken_1.default.sign({ id: user._id, companyName }, secretKey, {
+            expiresIn: "1h",
+        });
+        return res
+            .status(201)
+            .json({ msg: "User created", jwt: token, user: user.companyName });
     }
     catch (e) {
         console.error(e);
@@ -71,7 +75,7 @@ const getuserdetailsorig = async (req, res) => {
         return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
     try {
-        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        const cookies = cookie_1.default.parse(req.headers.cookie || "");
         console.log("jsdodckj   ", req.headers);
         const token = cookies.token;
         console.log(token);
@@ -98,7 +102,7 @@ const getuserdetails = async (req, res) => {
         return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
     try {
-        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        const cookies = cookie_1.default.parse(req.headers.cookie || "");
         console.log("jsdodckj   ", req.headers);
         const token = cookies.token;
         console.log(token);
@@ -124,7 +128,7 @@ const getuserdetails = async (req, res) => {
 exports.getuserdetails = getuserdetails;
 const checkauth = async (req, res) => {
     try {
-        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        const cookies = cookie_1.default.parse(req.headers.cookie || "");
         const token = cookies.token;
         const secretKey = process.env.SECRETKEY;
         if (!secretKey) {
@@ -140,7 +144,9 @@ const checkauth = async (req, res) => {
     }
     catch (error) {
         console.error("Error in authentication:", error);
-        res.status(500).json({ msg: "Internal server error", auth: false, user: "user" });
+        res
+            .status(500)
+            .json({ msg: "Internal server error", auth: false, user: "user" });
     }
 };
 exports.checkauth = checkauth;
@@ -148,22 +154,23 @@ const sendcallback = async (req, res) => {
     try {
         const sales = process.env.EMAIL_SALES || "";
         const { email, name, phone, company, requirements } = req.body;
-        const templatePath = path_1.default.join(__dirname, '../utils/callbackuser.html');
-        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const templatePath = path_1.default.join(__dirname, "../utils/callbackuser.html");
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         const a = name;
-        const htmlContent = htmlTemplate
-            .replace('{{name}}', a);
+        const htmlContent = htmlTemplate.replace("{{name}}", a);
         await (0, emailUtils_1.sendEmailSales)(email, "Your CallBack request has been sent", "Your request has been successfully confirmed.", htmlContent);
-        const templatePath2 = path_1.default.join(__dirname, '../utils/callbackadmin.html');
-        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, 'utf8');
+        const templatePath2 = path_1.default.join(__dirname, "../utils/callbackadmin.html");
+        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, "utf8");
         const htmlContent2 = htmlTemplate2
-            .replace('{{name}}', a)
-            .replace('{{phone}}', phone)
-            .replace('{{email}}', email)
-            .replace('{{company}}', company)
-            .replace('{{requirements}}', requirements);
+            .replace("{{name}}", a)
+            .replace("{{phone}}", phone)
+            .replace("{{email}}", email)
+            .replace("{{company}}", company)
+            .replace("{{requirements}}", requirements);
         await (0, emailUtils_1.sendEmailSales)(sales, "CallBack request recieved", "A callback request has been recieved.", htmlContent2);
-        res.status(200).json({ msg: "Request sent to both user and admin successfully!" });
+        res
+            .status(200)
+            .json({ msg: "Request sent to both user and admin successfully!" });
     }
     catch (err) {
         console.log(err);
@@ -174,26 +181,27 @@ exports.sendcallback = sendcallback;
 const contactus = async (req, res) => {
     try {
         const sales = process.env.EMAIL_SALES || "";
-        const { name, phone, email, location, seats, company, specifications, requirements } = req.body;
-        const templatePath = path_1.default.join(__dirname, '../utils/contactus.html');
-        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const { name, phone, email, location, seats, company, specifications, requirements, } = req.body;
+        const templatePath = path_1.default.join(__dirname, "../utils/contactus.html");
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         const a = name;
-        const htmlContent = htmlTemplate
-            .replace('{{name}}', a);
+        const htmlContent = htmlTemplate.replace("{{name}}", a);
         await (0, emailUtils_1.sendEmailSales)(email, "Your CallBack request has been sent", "Your request has been successfully confirmed.", htmlContent);
-        const templatePath2 = path_1.default.join(__dirname, '../utils/callbackadmin.html');
-        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, 'utf8');
+        const templatePath2 = path_1.default.join(__dirname, "../utils/callbackadmin.html");
+        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, "utf8");
         const htmlContent2 = htmlTemplate2
-            .replace('{{name}}', a)
-            .replace('{{phone}}', phone)
-            .replace('{{email}}', email)
-            .replace('{{pref}}', location)
-            .replace('{{company}}', company)
-            .replace('{{seats}}', seats)
-            .replace('{{Specifications}}', specifications)
-            .replace('{{requirements}}', requirements);
+            .replace("{{name}}", a)
+            .replace("{{phone}}", phone)
+            .replace("{{email}}", email)
+            .replace("{{pref}}", location)
+            .replace("{{company}}", company)
+            .replace("{{seats}}", seats)
+            .replace("{{Specifications}}", specifications)
+            .replace("{{requirements}}", requirements);
         await (0, emailUtils_1.sendEmailSales)(sales, "Customer is trying to contact", "A customer has raised a contact request.", htmlContent2);
-        res.status(200).json({ msg: "Request sent to both user and admin successfully!" });
+        res
+            .status(200)
+            .json({ msg: "Request sent to both user and admin successfully!" });
     }
     catch (err) {
         console.log(err);
@@ -251,7 +259,7 @@ const changepasswordbyuser = async (req, res) => {
         console.error("JWT secret key is not defined");
         return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
-    const cookies = cookie_1.default.parse(req.headers.cookie || '');
+    const cookies = cookie_1.default.parse(req.headers.cookie || "");
     console.log("jsdodckj   ", req.headers);
     const token = cookies.token;
     console.log(token);
@@ -274,11 +282,10 @@ const changepasswordbyuser = async (req, res) => {
         user.password = hashedNewPassword;
         const userEmail = user.email;
         // Read HTML template from file
-        const templatePath = path_1.default.join(__dirname, '../utils/passwordchange.html');
-        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const templatePath = path_1.default.join(__dirname, "../utils/passwordchange.html");
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         const a = user.companyName;
-        const htmlContent = htmlTemplate
-            .replace('{{name}}', a);
+        const htmlContent = htmlTemplate.replace("{{name}}", a);
         // Send confirmation email
         await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Password Changed Successfully", "Your password has been changed successfully.", htmlContent);
         await user.save();
@@ -311,10 +318,10 @@ const changeforgotpass = async (req, res) => {
         const hashedNewPassword = await bcrypt_1.default.hash(password, 10);
         user.password = hashedNewPassword;
         const userEmail = user.email;
-        const templatePath = path_1.default.join(__dirname, '../utils/passwordchange.html');
-        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const templatePath = path_1.default.join(__dirname, "../utils/passwordchange.html");
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         const companyName = user.companyName;
-        const htmlContent = htmlTemplate.replace('{{name}}', companyName);
+        const htmlContent = htmlTemplate.replace("{{name}}", companyName);
         await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Password Changed Successfully", "Your password has been changed successfully.", htmlContent);
         await user.save();
         res.status(200).json({ msg: "Password changed successfully" });
@@ -349,19 +356,21 @@ const forgotPassword = async (req, res) => {
         }
         const token = jsonwebtoken_1.default.sign({ email: email }, // Minimized payload
         secretKey, // Keep the key secure, consider its length if appropriate
-        { algorithm: 'HS384', expiresIn: '5m' } // Token expires in 3 minutes
+        { algorithm: "HS384", expiresIn: "5m" } // Token expires in 3 minutes
         );
         const link = `https://www.603thecoworkingspace.com/changepassword/${token}`;
-        const templatePath = path_1.default.join(__dirname, '../utils/forgotpass.html');
+        const templatePath = path_1.default.join(__dirname, "../utils/forgotpass.html");
         // Read HTML template
-        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         // Replace placeholders in template
         const htmlContent = htmlTemplate
-            .replace('{{name}}', email)
-            .replace('{{link}}', link); // Ensure 'link' is used here
+            .replace("{{name}}", email)
+            .replace("{{link}}", link); // Ensure 'link' is used here
         // Send confirmation email
         await (0, emailUtils_1.sendEmailAdmin)(email, "Password Reset Request", "Please use the link below to reset your password.", htmlContent);
-        return res.status(200).json({ msg: "Password reset link sent successfully!" });
+        return res
+            .status(200)
+            .json({ msg: "Password reset link sent successfully!" });
     }
     catch (error) {
         console.error("Error in forgotPassword function:", error);
@@ -377,7 +386,7 @@ const updateuser = async (req, res) => {
         return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
     try {
-        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        const cookies = cookie_1.default.parse(req.headers.cookie || "");
         console.log("jsdodckj   ", req.headers);
         const token = cookies.token;
         console.log(token);
@@ -408,7 +417,7 @@ const updateuserbyadmin = async (req, res) => {
         return res.status(500).json({ msg: "JWT secret key is not defined" });
     }
     try {
-        const { companyName, location, kyc, phone, email, role, monthlycredits, extracredits, creditsleft, id } = req.body;
+        const { companyName, location, kyc, phone, email, role, monthlycredits, extracredits, creditsleft, id, } = req.body;
         const user = await user_model_1.UserModel.findById(id);
         if (!user) {
             return res.status(404).json({ msg: "User not found" });
@@ -453,14 +462,18 @@ const deleteuserbyadmin = async (req, res) => {
 exports.deleteuserbyadmin = deleteuserbyadmin;
 const allusersbyadmin = async (req, res) => {
     try {
-        const totalUsers = await user_model_1.UserModel.find({ role: "user" }).sort({ createdAt: -1 });
-        const totaladmin = await user_model_1.UserModel.find({ role: "admin" }).sort({ createdAt: -1 });
+        const totalUsers = await user_model_1.UserModel.find({ role: "user" }).sort({
+            createdAt: -1,
+        });
+        const totaladmin = await user_model_1.UserModel.find({ role: "admin" }).sort({
+            createdAt: -1,
+        });
         const allworkspaces = await space_model_1.SpaceModel.find().sort({ createdAt: -1 });
         return res.status(200).json({
             msg: "details",
             totalUsers,
             totaladmin,
-            allworkspaces
+            allworkspaces,
         });
     }
     catch (error) {
@@ -471,7 +484,7 @@ const allusersbyadmin = async (req, res) => {
 exports.allusersbyadmin = allusersbyadmin;
 // Function to complete KYC for a user
 const dokyc = async (req, res) => {
-    const { user, firstname, lastname, phone, address, pancard, aadhar, companyname } = req.body;
+    const { user, firstname, lastname, phone, address, pancard, aadhar, companyname, } = req.body;
     try {
         await kyc_model_1.kycmodel.create({
             user,

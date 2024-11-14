@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = void 0;
+exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = exports.checkBookingAvailable = void 0;
 const booking_model_1 = require("../models/booking.model");
 const emailUtils_1 = require("../utils/emailUtils");
 const user_model_1 = require("../models/user.model");
@@ -12,10 +12,66 @@ const path_1 = __importDefault(require("path"));
 const space_model_1 = require("../models/space.model");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cookie_1 = __importDefault(require("cookie"));
+//convert time to 24hr basis
+function timeTo24Hours(timeStr) {
+    const [time, modifier] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":");
+    if (modifier === "pm" && hours !== "12") {
+        hours = (parseInt(hours, 10) + 12).toString();
+    }
+    else if (modifier === "am" && hours === "12") {
+        hours = "00";
+    }
+    return `${hours}:${minutes}`;
+}
+//check time overlap function
+function checkTimeOverlap(documents, inputStartTime, inputEndTime) {
+    // Convert input times to 24-hour format for comparison
+    const inputStart = timeTo24Hours(inputStartTime);
+    const inputEnd = timeTo24Hours(inputEndTime);
+    for (let doc of documents) {
+        // Convert document start and end times to 24-hour format
+        const docStart = timeTo24Hours(doc.startTime);
+        const docEnd = timeTo24Hours(doc.endTime);
+        // Check for overlap
+        if (inputStart < docEnd &&
+            inputEnd > docStart // General time overlap condition
+        ) {
+            return true; // Overlap found
+        }
+    }
+    return false; // No overlap found
+}
+//check booking available
+const checkBookingAvailable = async (req, res) => {
+    const { startTime, endTime, location, date } = req.body.appointmentDetails;
+    //get all the booking for same date
+    const bookingDetails = await booking_model_1.BookingModel.find({
+        date: date,
+        spaceName: location,
+    });
+    //check is it overlaping with somebooking
+    const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
+    //check if already booking exist
+    if (isoverlap) {
+        return res
+            .status(404)
+            .json({ message: "booking aleady exist on this time range" });
+    }
+};
+exports.checkBookingAvailable = checkBookingAvailable;
 // Create a new booking
 const createBooking = async (req, res) => {
     const { startTime, endTime, email, location, date, companyName } = req.body.appointmentDetails;
     const { credits } = req.body;
+    //get all the booking for same date
+    const bookingDetails = await booking_model_1.BookingModel.find({
+        date: date,
+        spaceName: location,
+    });
+    // console.log(bookingDetails);
+    const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
+    // console.log(isoverlap);
     try {
         if (!email) {
             return res.status(400).json({ message: "Email ID is required" });
@@ -23,6 +79,12 @@ const createBooking = async (req, res) => {
         const userdet = await user_model_1.UserModel.findOne({ email: email });
         if (!userdet) {
             return res.status(404).json({ message: "User not found" });
+        }
+        //check if already booking exist
+        if (isoverlap) {
+            return res
+                .status(404)
+                .json({ message: "booking aleady exist on this time range" });
         }
         // Find the location
         const loc = await space_model_1.SpaceModel.findOne({ name: location });
@@ -57,16 +119,16 @@ const createBooking = async (req, res) => {
         }
         const userEmail = userdet.email;
         // Read HTML template from file
-        const templatePath = path_1.default.join(__dirname, '../utils/email.html');
-        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const templatePath = path_1.default.join(__dirname, "../utils/email.html");
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         // Replace placeholders with actual values
         const a = userdet.companyName;
         const htmlContent = htmlTemplate
-            .replace('{{name}}', a)
-            .replace('{{startTime}}', startTime)
-            .replace('{{endTime}}', endTime)
-            .replace('{{place}}', location)
-            .replace('{{date}}', date);
+            .replace("{{name}}", a)
+            .replace("{{startTime}}", startTime)
+            .replace("{{endTime}}", endTime)
+            .replace("{{place}}", location)
+            .replace("{{date}}", date);
         // Send confirmation email
         await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Booking Confirmation", "Your room booking at 603 Coworking Space has been successfully confirmed.", htmlContent);
         res.status(201).json(newBooking);
@@ -91,15 +153,21 @@ const getlocationbookings = async (req, res) => {
         if (!location) {
             return res.status(404).json({ message: "Location not found" });
         }
-        const bookings = await booking_model_1.BookingModel.find({ date: selectedDate, space: location._id });
+        const bookings = await booking_model_1.BookingModel.find({
+            date: selectedDate,
+            space: location._id,
+        });
         if (bookings.length != 0) {
-            let arr = bookings.map(a => [a.startTime, a.endTime]);
+            let arr = bookings.map((a) => [
+                a.startTime,
+                a.endTime,
+            ]);
             const convertToTime = (time) => {
-                const [hourMinute, period] = time.split(' ');
-                let [hour, minute] = hourMinute.split(':').map(Number);
-                if (period.toLowerCase() === 'pm' && hour !== 12)
+                const [hourMinute, period] = time.split(" ");
+                let [hour, minute] = hourMinute.split(":").map(Number);
+                if (period.toLowerCase() === "pm" && hour !== 12)
                     hour += 12;
-                if (period.toLowerCase() === 'am' && hour === 12)
+                if (period.toLowerCase() === "am" && hour === 12)
                     hour = 0;
                 return new Date(0, 0, 0, hour, minute);
             };
@@ -109,7 +177,10 @@ const getlocationbookings = async (req, res) => {
             for (let i = 1; i < arr.length; i++) {
                 let [nextStart, nextEnd] = arr[i];
                 if (convertToTime(nextStart) <= convertToTime(currentEnd)) {
-                    currentEnd = convertToTime(nextEnd) > convertToTime(currentEnd) ? nextEnd : currentEnd;
+                    currentEnd =
+                        convertToTime(nextEnd) > convertToTime(currentEnd)
+                            ? nextEnd
+                            : currentEnd;
                 }
                 else {
                     merged.push([currentStart, currentEnd]);
@@ -137,7 +208,7 @@ const getAllBookingsbyuser = async (req, res) => {
             console.error("JWT secret key is not defined");
             return res.status(500).json({ msg: "JWT secret key is not defined" });
         }
-        const cookies = cookie_1.default.parse(req.headers.cookie || '');
+        const cookies = cookie_1.default.parse(req.headers.cookie || "");
         console.log("jsdodckj   ", req.headers);
         const token = cookies.token;
         console.log(token);
@@ -175,7 +246,9 @@ const getBookingsByUserId = async (req, res) => {
         res.status(200).json(bookings);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching bookings by user ID", error });
+        res
+            .status(500)
+            .json({ message: "Error fetching bookings by user ID", error });
     }
 };
 exports.getBookingsByUserId = getBookingsByUserId;
@@ -235,6 +308,7 @@ const deleteBookingbyuser = async (req, res) => {
             await user.save();
         }
         res.status(200).json({ message: "Booking cancelled successfully!" });
+        //send a cancel booking email
     }
     catch (error) {
         res.status(500).json({ message: "Error deleting booking", error });
@@ -250,7 +324,7 @@ const allbookingbyadmin = async (req, res) => {
         return res.status(200).json({
             msg: "bookingdetails",
             allbookings,
-            allusers
+            allusers,
         });
     }
     catch (error) {
