@@ -5,6 +5,7 @@ const Razorpay = require("razorpay");
 const dotenv = require("dotenv");
 const crypto = require("crypto");
 const { validateWebhookSignature, } = require("razorpay/dist/utils/razorpay-utils");
+// import { createClient } from "redis";
 //configure
 dotenv.config();
 //razorpay
@@ -12,6 +13,17 @@ const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEYID,
     key_secret: process.env.RAZORPAY_SECRETKEY,
 });
+// // Create Redis client
+// const redisClient = createClient();
+// // Connect to Redis
+// (async () => {
+//   try {
+//     await redisClient.connect(); // Ensure Redis client is connected
+//     console.log("Connected to Redis...");
+//   } catch (error) {
+//     console.error("Error connecting to Redis:", error);
+//   }
+// })();
 // payment schema
 // const paymentSchema: Schema = new Schema<PaymentInterface>({
 //   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -62,14 +74,37 @@ const razorpay = new Razorpay({
 //2)send a post req to createOrder along with user data ,booking data
 //3)send a req to validate
 //4)save the payment data to database
+// In-memory store to hold the order data
+const orderDataStore = {};
 // Route to handle order creation
 const createOrder = async (req, res) => {
     try {
         console.log("enter the api");
-        const options = req.body;
+        //using redis for data management
+        // console.log(dayPasses, "daypasses");
+        // console.log(bookings, "bookings");
+        // console.log(data, "user details");
+        console.log(req.body);
+        // {price: 899, spaceName: 'Bandra Day Pass', bookeddate: '15/11/2024', day: 15, month: 10}
+        const { options, bookings, daypasses, userDetails } = req.body;
         const order = await razorpay.orders.create(options);
         console.log(order);
         // const order = false;
+        // Store custom data in Redis using the `razorpay_order_id` as the key
+        const customData = {
+            bookings,
+            daypasses,
+            userDetails,
+        };
+        // Store custom data in-memory using the `razorpay_order_id` as the key
+        orderDataStore[order.id] = {
+            customData,
+        };
+        console.log(orderDataStore);
+        // // Store custom data in Redis with expiration time (EX in seconds)
+        // await redisClient.set(order.id, JSON.stringify(customData), {
+        //   EX: 3600, // 1 hour expiration
+        // });
         if (!order) {
             return res.status(500).json({ message: "error" });
         }
@@ -121,6 +156,19 @@ const validateOrder = async (req, res) => {
                     : "No description available",
             });
         }
+        // //get data back from the redis
+        // // Fetch custom data from Redis using razorpay_order_id as the key
+        // const data = await redisClient.get(razorpay_order_id);
+        // if (!data) {
+        //   return res.status(404).json({ message: "Order not found in Redis" });
+        // }
+        // // Parse the custom data from Redis
+        // const customData = JSON.parse(data);
+        // Retrieve custom data from the in-memory store using razorpay_order_id
+        const orderData = orderDataStore[razorpay_order_id];
+        if (!orderData) {
+            return res.status(404).json({ message: "Order not found in memory" });
+        }
         // Send response back with payment details
         res.status(200).json({
             msg: "Success",
@@ -128,11 +176,12 @@ const validateOrder = async (req, res) => {
             paymentId: razorpay_payment_id,
             paymentMethod, // Send the payment method in the response
             paymentDetails: payment, // Optional: Send complete payment details if needed
+            customData: orderData,
         });
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ msg: "Error fetching payment method" });
+        res.status(500).json({ msg: "Error fetching payment method", error });
     }
 };
 exports.validateOrder = validateOrder;
