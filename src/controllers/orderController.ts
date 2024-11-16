@@ -80,7 +80,9 @@ export const validateOrder = async (req: Request, res: Response) => {
     // Fetch payment details from Razorpay
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
     if (!payment) {
-      return res.status(500).json({ msg: "Error fetching payment details" });
+      return res
+        .status(500)
+        .json({ msg: "Error fetching payment details", payment });
     }
 
     console.log(payment);
@@ -104,109 +106,8 @@ export const validateOrder = async (req: Request, res: Response) => {
 
     // Retrieve custom data from the in-memory store using razorpay_order_id
     const orderData = orderDataStore[razorpay_order_id];
-
     if (!orderData) {
       return res.status(404).json({ message: "Order not found in memory" });
-    }
-
-    //send a email
-    const userEmail = orderData.customData.userDetails.email;
-
-    // Read HTML template from file
-    const templatePath = path.join(__dirname, "../utils/email.html");
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
-
-    // Replace placeholders with actual values
-    const companyName = orderData.customData.userDetails.companyName;
-
-    if (orderData.customData.bookings.length !== 0) {
-      //get space id
-      const loc = await SpaceModel.findOne({
-        name: orderData.customData.bookings[0].spaceName,
-      });
-      if (!loc) {
-        return res.status(404).json({ message: "Location not found" });
-      }
-
-      const newBooking = new BookingModel({
-        user: orderData.customData.userDetails._id,
-        space: loc?._id,
-        companyName: orderData.customData.userDetails.companyName,
-        spaceName: loc?.name,
-        location: loc?.location,
-        startTime: orderData.customData.bookings[0].startTime,
-        endTime: orderData.customData.bookings[0].endTime,
-        date: orderData.customData.bookings[0].date,
-        // creditsspent: credits, //check for later
-        paymentMethod,
-        status: "confirmed",
-      });
-      const storeBooking = await newBooking.save();
-
-      //store payment
-      const newPayment = new PaymentModel({
-        user: orderData.customData.userDetails._id,
-        booking: storeBooking._id,
-        amount: payment.amount / 100,
-        paymentMethod,
-        status: paymentStatus,
-      });
-
-      //store the payment
-      await newPayment.save();
-
-      const htmlContent = htmlTemplate
-        .replace("{{name}}", companyName)
-        .replace("{{startTime}}", orderData.customData.bookings[0].startTime)
-        .replace("{{endTime}}", orderData.customData.bookings[0].endTime)
-        .replace("{{place}}", loc.name)
-        .replace("{{date}}", orderData.customData.bookings[0].date);
-
-      // Send confirmation email
-
-      await sendEmailAdmin(
-        userEmail,
-        "Booking Confirmation",
-        "Your room booking at 603 Coworking Space has been successfully confirmed.",
-        htmlContent
-      );
-    }
-
-    if (orderData.customData.daypasses.length !== 0) {
-      //get space id
-      const loc = await SpaceModel.findOne({
-        name: orderData.customData.dayPasses[0].spaceName,
-      });
-
-      const newDaypass = new DayPass({
-        space: loc?._id,
-        companyName: orderData.customData.userDetails.companyName,
-        user: orderData.customData.userDetails._id,
-        email: orderData.customData.userDetails.email,
-        spaceName: loc?.name,
-        phone: orderData.customData.userDetails.phone,
-        bookeddate: orderData.customData.daypasses[0].bookeddate,
-        day: orderData.customData.daypasses[0].day,
-        month: orderData.customData.daypasses[0].month,
-        year: orderData.customData.daypasses[0].year,
-        status: payment.status,
-        paymentMethod,
-      });
-
-      const storeDaypass = await newDaypass.save();
-
-      //store payment
-      const newPayment = new PaymentModel({
-        user: orderData.customData.userDetails._id,
-        booking: storeDaypass._id,
-        amount: payment.amount / 100,
-        paymentMethod,
-        status: paymentStatus,
-      });
-
-      await newPayment.save();
-
-      //send a mail to the daypass booking person
     }
 
     // Send response back with payment details
@@ -220,7 +121,7 @@ export const validateOrder = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "Error fetching payment method", error });
+    res.status(500).json({ msg: "error ", error });
   }
 };
 
@@ -243,3 +144,103 @@ export const storePaymentTestingApi = async (req: Request, res: Response) => {
     newPayment,
   });
 };
+
+// //send a email
+// const userEmail = orderData.customData.userDetails.email;
+
+// // Read HTML template from file
+// const templatePath = path.join(__dirname, "../utils/email.html");
+// let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+
+// // Replace placeholders with actual values
+// const companyName = orderData.customData.userDetails.companyName;
+
+// if (orderData.customData.bookings.length !== 0) {
+//   //get space id
+//   const loc = await SpaceModel.findOne({
+//     name: orderData.customData.bookings[0].spaceName,
+//   });
+//   if (!loc) {
+//     return res.status(404).json({ message: "Location not found" });
+//   }
+
+//   const newBooking = new BookingModel({
+//     user: orderData.customData.userDetails._id,
+//     space: loc?._id,
+//     companyName: orderData.customData.userDetails.companyName,
+//     spaceName: loc?.name,
+//     location: loc?.location,
+//     startTime: orderData.customData.bookings[0].startTime,
+//     endTime: orderData.customData.bookings[0].endTime,
+//     date: orderData.customData.bookings[0].date,
+//     // creditsspent: credits, //check for later
+//     paymentMethod,
+//     status: "confirmed",
+//   });
+//   const storeBooking = await newBooking.save();
+
+//   //store payment
+//   const newPayment = new PaymentModel({
+//     user: orderData.customData.userDetails._id,
+//     booking: storeBooking._id,
+//     amount: payment.amount / 100,
+//     paymentMethod,
+//     status: paymentStatus,
+//   });
+
+//   //store the payment
+//   await newPayment.save();
+
+//   const htmlContent = htmlTemplate
+//     .replace("{{name}}", companyName)
+//     .replace("{{startTime}}", orderData.customData.bookings[0].startTime)
+//     .replace("{{endTime}}", orderData.customData.bookings[0].endTime)
+//     .replace("{{place}}", loc.name)
+//     .replace("{{date}}", orderData.customData.bookings[0].date);
+
+//   // Send confirmation email
+
+//   await sendEmailAdmin(
+//     userEmail,
+//     "Booking Confirmation",
+//     "Your room booking at 603 Coworking Space has been successfully confirmed.",
+//     htmlContent
+//   );
+// }
+
+// if (orderData.customData.daypasses.length !== 0) {
+//   //get space id
+//   const loc = await SpaceModel.findOne({
+//     name: orderData.customData.dayPasses[0].spaceName,
+//   });
+
+//   const newDaypass = new DayPass({
+//     space: loc?._id,
+//     companyName: orderData.customData.userDetails.companyName,
+//     user: orderData.customData.userDetails._id,
+//     email: orderData.customData.userDetails.email,
+//     spaceName: loc?.name,
+//     phone: orderData.customData.userDetails.phone,
+//     bookeddate: orderData.customData.daypasses[0].bookeddate,
+//     day: orderData.customData.daypasses[0].day,
+//     month: orderData.customData.daypasses[0].month,
+//     year: orderData.customData.daypasses[0].year,
+//     status: payment.status,
+//     paymentMethod,
+//   });
+
+//   const storeDaypass = await newDaypass.save();
+
+//   //store payment
+//   const newPayment = new PaymentModel({
+//     user: orderData.customData.userDetails._id,
+//     booking: storeDaypass._id,
+//     amount: payment.amount / 100,
+//     paymentMethod,
+//     status: paymentStatus,
+//   });
+
+//   await newPayment.save();
+
+//   //send a mail to the daypass booking person
+// }
