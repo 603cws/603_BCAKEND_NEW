@@ -6,7 +6,14 @@ const {
   validateWebhookSignature,
 } = require("razorpay/dist/utils/razorpay-utils");
 
-// import { createClient } from "redis";
+import { BookingModel } from "../models/booking.model";
+import { createBooking } from "../controllers/bookingControllers";
+import { SpaceModel } from "../models/space.model";
+import { sendEmailAdmin } from "../utils/emailUtils";
+import fs from "fs";
+import path from "path";
+import { DayPass } from "../models/Daypassbookingmodel";
+import { PaymentModel } from "../models/payment.model";
 
 //configure
 dotenv.config();
@@ -16,19 +23,6 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEYID,
   key_secret: process.env.RAZORPAY_SECRETKEY,
 });
-
-// // Create Redis client
-// const redisClient = createClient();
-
-// // Connect to Redis
-// (async () => {
-//   try {
-//     await redisClient.connect(); // Ensure Redis client is connected
-//     console.log("Connected to Redis...");
-//   } catch (error) {
-//     console.error("Error connecting to Redis:", error);
-//   }
-// })();
 
 // payment schema
 // const paymentSchema: Schema = new Schema<PaymentInterface>({
@@ -186,22 +180,110 @@ export const validateOrder = async (req: Request, res: Response) => {
       });
     }
 
-    // //get data back from the redis
-
-    // // Fetch custom data from Redis using razorpay_order_id as the key
-    // const data = await redisClient.get(razorpay_order_id);
-    // if (!data) {
-    //   return res.status(404).json({ message: "Order not found in Redis" });
-    // }
-
-    // // Parse the custom data from Redis
-    // const customData = JSON.parse(data);
-
     // Retrieve custom data from the in-memory store using razorpay_order_id
     const orderData = orderDataStore[razorpay_order_id];
 
     if (!orderData) {
       return res.status(404).json({ message: "Order not found in memory" });
+    }
+
+    //send a email
+    const userEmail = orderData.customData.userDetails.email;
+
+    // Read HTML template from file
+    const templatePath = path.join(__dirname, "../utils/email.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+
+    // Replace placeholders with actual values
+    const companyName = orderData.customData.userDetails.companyName;
+
+    if (orderData.customData.bookings.length !== 0) {
+      //get space id
+      const loc = await SpaceModel.findOne({
+        name: orderData.customData.bookings.spaceName,
+      });
+      if (!loc) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+
+      const newBooking = new BookingModel({
+        user: orderData.customData.userDetails._id,
+        space: loc?._id,
+        companyName: orderData.customData.userDetails.companyName,
+        spaceName: loc?.name,
+        location: loc?.location,
+        startTime: orderData.customData.bookings.startTime,
+        endTime: orderData.customData.bookings.endTime,
+        date: orderData.customData.bookings,
+        // creditsspent: credits, //check for later
+        paymentMethod,
+        status: "confirmed",
+      });
+      const storeBooking = await newBooking.save();
+
+      //store payment
+      const newPayment = new PaymentModel({
+        user: orderData.customData.userDetails._id,
+        booking: storeBooking._id,
+        amount: payment.amount / 100,
+        paymentMethod,
+        status: paymentStatus,
+      });
+
+      await newPayment.save();
+
+      const htmlContent = htmlTemplate
+        .replace("{{name}}", companyName)
+        .replace("{{startTime}}", orderData.customData.bookings.startTime)
+        .replace("{{endTime}}", orderData.customData.bookings.endTime)
+        .replace("{{place}}", loc.name)
+        .replace("{{date}}", orderData.customData.bookings.date);
+
+      // Send confirmation email
+
+      await sendEmailAdmin(
+        userEmail,
+        "Booking Confirmation",
+        "Your room booking at 603 Coworking Space has been successfully confirmed.",
+        htmlContent
+      );
+    }
+
+    if (orderData.customData.daypasses.length !== 0) {
+      //get space id
+      const loc = await SpaceModel.findOne({
+        name: orderData.customData.dayPasses.spaceName,
+      });
+
+      const newDaypass = new DayPass({
+        space: loc?._id,
+        companyName: orderData.customData.userDetails.companyName,
+        user: orderData.customData.userDetails._id,
+        email: orderData.customData.userDetails.email,
+        spaceName: loc?.name,
+        phone: orderData.customData.userDetails.phone,
+        bookeddate: orderData.customData.daypasses.bookeddate,
+        day: orderData.customData.daypasses.day,
+        month: orderData.customData.daypasses.month,
+        year: orderData.customData.daypasses.year,
+        status: payment.status,
+        paymentMethod,
+      });
+
+      const storeDaypass = await newDaypass.save();
+
+      //store payment
+      const newPayment = new PaymentModel({
+        user: orderData.customData.userDetails._id,
+        booking: storeDaypass._id,
+        amount: payment.amount / 100,
+        paymentMethod,
+        status: paymentStatus,
+      });
+
+      await newPayment.save();
+
+      //send a mail to the daypass booking person
     }
 
     // Send response back with payment details
@@ -217,4 +299,24 @@ export const validateOrder = async (req: Request, res: Response) => {
     console.log(error);
     res.status(500).json({ msg: "Error fetching payment method", error });
   }
+};
+
+export const storePaymentTestingApi = async (req: Request, res: Response) => {
+  const { bookings, userDetails, amount, paymentMethod, paymentStatus } =
+    req.body;
+
+  //store payment
+  const newPayment = new PaymentModel({
+    user: userDetails._id,
+    booking: bookings._id,
+    amount: amount / 100,
+    paymentMethod,
+    status: paymentStatus,
+  });
+  await newPayment.save();
+
+  res.status(200).json({
+    message: "success",
+    newPayment,
+  });
 };

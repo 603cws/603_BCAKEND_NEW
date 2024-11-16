@@ -27,7 +27,8 @@ exports.PaymentModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const paymentSchema = new mongoose_1.Schema({
     user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    booking: { type: mongoose_1.Schema.Types.ObjectId, ref: "Booking", required: true },
+    booking: { type: mongoose_1.Schema.Types.ObjectId, ref: "Booking" },
+    daypasses: { type: mongoose_1.Schema.Types.ObjectId, ref: "Daypasses" },
     amount: { type: Number, required: true },
     paymentMethod: {
         type: String,
@@ -36,7 +37,14 @@ const paymentSchema = new mongoose_1.Schema({
     },
     status: {
         type: String,
-        enum: ["pending", "completed", "failed", "authorized", "success"],
+        enum: [
+            "pending",
+            "completed",
+            "failed",
+            "authorized",
+            "success",
+            "captured",
+        ],
         default: "pending",
     },
     createdAt: { type: Date, default: Date.now },

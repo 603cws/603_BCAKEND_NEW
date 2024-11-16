@@ -1,9 +1,16 @@
 import { Router } from "express";
-import { createOrder, validateOrder } from "../controllers/orderController";
+import {
+  createOrder,
+  storePaymentTestingApi,
+  validateOrder,
+} from "../controllers/orderController";
+import { isBookingOverlap } from "../middlewares/isBookedMiddleware";
 //
 const router = Router();
 
-router.post("/createorder", createOrder);
+router.post("/createorder", isBookingOverlap, createOrder);
 router.post("/validateOrder", validateOrder);
+
+router.post("/testPaymentatore", storePaymentTestingApi);
 
 export default router;
