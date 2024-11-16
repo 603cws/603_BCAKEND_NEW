@@ -24,86 +24,17 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_SECRETKEY,
 });
 
-// payment schema
-// const paymentSchema: Schema = new Schema<PaymentInterface>({
-//   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-//   booking: { type: Schema.Types.ObjectId, ref: "Booking", required: true },
-//   amount: { type: Number, required: true },
-//   paymentMethod: {
-//     type: String,
-//     enum: ["card", "paypal", "bank_transfer", "upi", "netbanking"],
-//     required: true,
-//   },
-//   status: {
-//     type: String,
-//     enum: ["pending", "completed", "failed", "authorized", "success"],
-//     default: "pending",
-//   },
-//   createdAt: { type: Date, default: Date.now },
-// });
-
-// userdetails
-// {
-//   "user": {
-//       "_id": "6729c2e70d51e5f265467a94",
-//       "companyName": "603cws",
-//       "username": "testuser",
-//       "email": "manchadiyuvraj@gmail.com",
-//       "country": "India",
-//       "state": "Haryana",
-//       "city": "Hisar",
-//       "zipcode": "125005",
-//       "password": "$2b$10$CBpB76XlqvftF5xWCWppG.5nl3OH7TabhLk4E5Pkz3XZQQiNhjTXO",
-//       "phone": "9594767165",
-//       "role": "admin",
-//       "kyc": false,
-//       "creditsleft": 1,
-//       "monthlycredits": 7,
-//       "extracredits": 22,
-//       "createdAt": "2024-11-05T07:01:59.543Z",
-//       "__v": 0
-//   }
-// }
-
-//booking array
-
-// date// : // "13/11/2024"
-// endTime// : // "9:00 pm"
-// price// : // 1199
-// spaceName// : // "Bandra Conference Room"
-// startTime// : // "8:00 pm"
-
-//to create a order
-// 1)get user data,booking data
-
-//2)send a post req to createOrder along with user data ,booking data
-
-//3)send a req to validate
-
-//4)save the payment data to database
-
 // In-memory store to hold the order data
 const orderDataStore: Record<string, any> = {};
 
 // Route to handle order creation
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    console.log("enter the api");
-
-    //using redis for data management
-    // console.log(dayPasses, "daypasses");
-    // console.log(bookings, "bookings");
-    // console.log(data, "user details");
-
-    console.log(req.body);
-    // {price: 899, spaceName: 'Bandra Day Pass', bookeddate: '15/11/2024', day: 15, month: 10}
-
     const { options, bookings, daypasses, userDetails } = req.body;
+    console.log(req.body);
 
     const order = await razorpay.orders.create(options);
     console.log(order);
-
-    // const order = false;
 
     // Store custom data in Redis using the `razorpay_order_id` as the key
     const customData = {
@@ -117,10 +48,6 @@ export const createOrder = async (req: Request, res: Response) => {
     };
 
     console.log(orderDataStore);
-    // // Store custom data in Redis with expiration time (EX in seconds)
-    // await redisClient.set(order.id, JSON.stringify(customData), {
-    //   EX: 3600, // 1 hour expiration
-    // });
 
     if (!order) {
       return res.status(500).json({ message: "error" });
@@ -162,11 +89,6 @@ export const validateOrder = async (req: Request, res: Response) => {
     const paymentMethod = payment.method; // e.g., "card", "upi", "netbanking", etc.
 
     //payment status
-    // created: Payment request is created.
-    // authorized: Payment is authorized but not captured.
-    // captured: Payment was successful and captured.
-    // failed: Payment failed.
-    // refunded: Payment was refunded.
     const paymentStatus = payment.status; //eg,'authorized','captured','failed'
     if (paymentStatus === "failed") {
       // Payment failed
