@@ -152,6 +152,7 @@ export const validateOrder = async (req: Request, res: Response) => {
         status: paymentStatus,
       });
 
+      //store the payment
       await newPayment.save();
 
       const htmlContent = htmlTemplate

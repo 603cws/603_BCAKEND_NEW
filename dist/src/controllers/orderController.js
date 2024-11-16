@@ -130,6 +130,7 @@ const validateOrder = async (req, res) => {
                 paymentMethod,
                 status: paymentStatus,
             });
+            //store the payment
             await newPayment.save();
             const htmlContent = htmlTemplate
                 .replace("{{name}}", companyName)
