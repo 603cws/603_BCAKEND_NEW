@@ -103,7 +103,7 @@ const validateOrder = async (req, res) => {
         if (orderData.customData.bookings.length !== 0) {
             //get space id
             const loc = await space_model_1.SpaceModel.findOne({
-                name: orderData.customData.bookings.spaceName,
+                name: orderData.customData.bookings[0].spaceName,
             });
             if (!loc) {
                 return res.status(404).json({ message: "Location not found" });
@@ -114,9 +114,9 @@ const validateOrder = async (req, res) => {
                 companyName: orderData.customData.userDetails.companyName,
                 spaceName: loc?.name,
                 location: loc?.location,
-                startTime: orderData.customData.bookings.startTime,
-                endTime: orderData.customData.bookings.endTime,
-                date: orderData.customData.bookings,
+                startTime: orderData.customData.bookings[0].startTime,
+                endTime: orderData.customData.bookings[0].endTime,
+                date: orderData.customData.bookings[0].date,
                 // creditsspent: credits, //check for later
                 paymentMethod,
                 status: "confirmed",
@@ -134,17 +134,17 @@ const validateOrder = async (req, res) => {
             await newPayment.save();
             const htmlContent = htmlTemplate
                 .replace("{{name}}", companyName)
-                .replace("{{startTime}}", orderData.customData.bookings.startTime)
-                .replace("{{endTime}}", orderData.customData.bookings.endTime)
+                .replace("{{startTime}}", orderData.customData.bookings[0].startTime)
+                .replace("{{endTime}}", orderData.customData.bookings[0].endTime)
                 .replace("{{place}}", loc.name)
-                .replace("{{date}}", orderData.customData.bookings.date);
+                .replace("{{date}}", orderData.customData.bookings[0].date);
             // Send confirmation email
             await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Booking Confirmation", "Your room booking at 603 Coworking Space has been successfully confirmed.", htmlContent);
         }
         if (orderData.customData.daypasses.length !== 0) {
             //get space id
             const loc = await space_model_1.SpaceModel.findOne({
-                name: orderData.customData.dayPasses.spaceName,
+                name: orderData.customData.dayPasses[0].spaceName,
             });
             const newDaypass = new Daypassbookingmodel_1.DayPass({
                 space: loc?._id,
@@ -153,10 +153,10 @@ const validateOrder = async (req, res) => {
                 email: orderData.customData.userDetails.email,
                 spaceName: loc?.name,
                 phone: orderData.customData.userDetails.phone,
-                bookeddate: orderData.customData.daypasses.bookeddate,
-                day: orderData.customData.daypasses.day,
-                month: orderData.customData.daypasses.month,
-                year: orderData.customData.daypasses.year,
+                bookeddate: orderData.customData.daypasses[0].bookeddate,
+                day: orderData.customData.daypasses[0].day,
+                month: orderData.customData.daypasses[0].month,
+                year: orderData.customData.daypasses[0].year,
                 status: payment.status,
                 paymentMethod,
             });
@@ -190,7 +190,7 @@ const validateOrder = async (req, res) => {
 exports.validateOrder = validateOrder;
 const storePaymentTestingApi = async (req, res) => {
     const { bookings, userDetails, amount, paymentMethod, paymentStatus } = req.body;
-    //store payment
+    // //store payment
     const newPayment = new payment_model_1.PaymentModel({
         user: userDetails._id,
         booking: bookings._id,

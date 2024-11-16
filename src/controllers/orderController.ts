@@ -122,7 +122,7 @@ export const validateOrder = async (req: Request, res: Response) => {
     if (orderData.customData.bookings.length !== 0) {
       //get space id
       const loc = await SpaceModel.findOne({
-        name: orderData.customData.bookings.spaceName,
+        name: orderData.customData.bookings[0].spaceName,
       });
       if (!loc) {
         return res.status(404).json({ message: "Location not found" });
@@ -134,9 +134,9 @@ export const validateOrder = async (req: Request, res: Response) => {
         companyName: orderData.customData.userDetails.companyName,
         spaceName: loc?.name,
         location: loc?.location,
-        startTime: orderData.customData.bookings.startTime,
-        endTime: orderData.customData.bookings.endTime,
-        date: orderData.customData.bookings,
+        startTime: orderData.customData.bookings[0].startTime,
+        endTime: orderData.customData.bookings[0].endTime,
+        date: orderData.customData.bookings[0].date,
         // creditsspent: credits, //check for later
         paymentMethod,
         status: "confirmed",
@@ -157,10 +157,10 @@ export const validateOrder = async (req: Request, res: Response) => {
 
       const htmlContent = htmlTemplate
         .replace("{{name}}", companyName)
-        .replace("{{startTime}}", orderData.customData.bookings.startTime)
-        .replace("{{endTime}}", orderData.customData.bookings.endTime)
+        .replace("{{startTime}}", orderData.customData.bookings[0].startTime)
+        .replace("{{endTime}}", orderData.customData.bookings[0].endTime)
         .replace("{{place}}", loc.name)
-        .replace("{{date}}", orderData.customData.bookings.date);
+        .replace("{{date}}", orderData.customData.bookings[0].date);
 
       // Send confirmation email
 
@@ -175,7 +175,7 @@ export const validateOrder = async (req: Request, res: Response) => {
     if (orderData.customData.daypasses.length !== 0) {
       //get space id
       const loc = await SpaceModel.findOne({
-        name: orderData.customData.dayPasses.spaceName,
+        name: orderData.customData.dayPasses[0].spaceName,
       });
 
       const newDaypass = new DayPass({
@@ -185,10 +185,10 @@ export const validateOrder = async (req: Request, res: Response) => {
         email: orderData.customData.userDetails.email,
         spaceName: loc?.name,
         phone: orderData.customData.userDetails.phone,
-        bookeddate: orderData.customData.daypasses.bookeddate,
-        day: orderData.customData.daypasses.day,
-        month: orderData.customData.daypasses.month,
-        year: orderData.customData.daypasses.year,
+        bookeddate: orderData.customData.daypasses[0].bookeddate,
+        day: orderData.customData.daypasses[0].day,
+        month: orderData.customData.daypasses[0].month,
+        year: orderData.customData.daypasses[0].year,
         status: payment.status,
         paymentMethod,
       });
@@ -228,7 +228,7 @@ export const storePaymentTestingApi = async (req: Request, res: Response) => {
   const { bookings, userDetails, amount, paymentMethod, paymentStatus } =
     req.body;
 
-  //store payment
+  // //store payment
   const newPayment = new PaymentModel({
     user: userDetails._id,
     booking: bookings._id,
