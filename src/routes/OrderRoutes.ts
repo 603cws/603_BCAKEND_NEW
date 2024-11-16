@@ -8,7 +8,7 @@ import { isBookingOverlap } from "../middlewares/isBookedMiddleware";
 //
 const router = Router();
 
-router.post("/createorder", isBookingOverlap, createOrder);
+router.post("/createorder", createOrder);
 router.post("/validateOrder", validateOrder);
 
 router.post("/testPaymentatore", storePaymentTestingApi);
