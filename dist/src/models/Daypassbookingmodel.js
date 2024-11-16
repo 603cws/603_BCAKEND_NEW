@@ -30,13 +30,29 @@ const DayPassSchema = new mongoose_1.Schema({
     companyName: { type: String, required: true },
     email: { type: String, required: true },
     spaceName: { type: String, required: true },
-    phone: { type: Number, required: true },
+    phone: { type: mongoose_1.default.Schema.Types.Mixed },
     bookeddate: { type: String, required: true },
     day: { type: Number, required: true },
     month: { type: Number, required: true },
     year: { type: Number, required: true },
-    status: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
-    paymentMethod: { type: String, enum: ["credit_card", "paypal", "pending"], default: "pending" },
-    createdAt: { type: Date, default: Date.now }
+    status: {
+        type: String,
+        enum: [
+            "pending",
+            "confirmed",
+            "cancelled",
+            "authorized",
+            "captured",
+            "success",
+            "failed",
+        ],
+        default: "pending",
+    },
+    paymentMethod: {
+        type: String,
+        enum: ["card", "paypal", "bank_transfer", "upi", "netbanking", "pending"],
+        default: "pending",
+    },
+    createdAt: { type: Date, default: Date.now },
 });
 exports.DayPass = mongoose_1.default.model("DayPass", DayPassSchema);
