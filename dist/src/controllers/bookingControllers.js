@@ -5,7 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = exports.checkBookingAvailable = exports.checkTimeOverlap = void 0;
 const booking_model_1 = require("../models/booking.model");
+const emailUtils_1 = require("../utils/emailUtils");
 const user_model_1 = require("../models/user.model");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const space_model_1 = require("../models/space.model");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cookie_1 = __importDefault(require("cookie"));
@@ -115,25 +118,20 @@ const createBooking = async (req, res) => {
         if (!userdet || !userdet.email) {
             throw new Error("User email is not defined");
         }
-        // const userEmail = userdet.email;
-        // // Read HTML template from file
-        // const templatePath = path.join(__dirname, "../utils/email.html");
-        // let htmlTemplate = fs.readFileSync(templatePath, "utf8");
-        // // Replace placeholders with actual values
-        // const a = userdet.companyName;
-        // const htmlContent = htmlTemplate
-        //   .replace("{{name}}", a)
-        //   .replace("{{startTime}}", startTime)
-        //   .replace("{{endTime}}", endTime)
-        //   .replace("{{place}}", location)
-        //   .replace("{{date}}", date);
-        // // Send confirmation email
-        // await sendEmailAdmin(
-        //   userEmail,
-        //   "Booking Confirmation",
-        //   "Your room booking at 603 Coworking Space has been successfully confirmed.",
-        //   htmlContent
-        // );
+        const userEmail = userdet.email;
+        // Read HTML template from file
+        const templatePath = path_1.default.join(__dirname, "../utils/email.html");
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
+        // Replace placeholders with actual values
+        const a = userdet.companyName;
+        const htmlContent = htmlTemplate
+            .replace("{{name}}", a)
+            .replace("{{startTime}}", startTime)
+            .replace("{{endTime}}", endTime)
+            .replace("{{place}}", location)
+            .replace("{{date}}", date);
+        // Send confirmation email
+        await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Booking Confirmation", "Your room booking at 603 Coworking Space has been successfully confirmed.", htmlContent);
         res.status(201).json(newBooking);
     }
     catch (error) {

@@ -47,7 +47,7 @@ exports.createOrder = createOrder;
 const validateOrder = async (req, res) => {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
     // Verify the payment signature
-    const sha = crypto.createHmac("sha256", "CNdNjoyuKTMCKtsojYtmrgvV");
+    const sha = crypto.createHmac("sha256", process.env.RAZORPAY_SECRETKEY);
     sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
     const digest = sha.digest("hex");
     if (digest !== razorpay_signature) {
@@ -61,7 +61,6 @@ const validateOrder = async (req, res) => {
                 .status(500)
                 .json({ msg: "Error fetching payment details", payment });
         }
-        console.log(payment);
         // Extract the payment method used
         const paymentMethod = payment.method; // e.g., "card", "upi", "netbanking", etc.
         //payment status
@@ -222,3 +221,78 @@ const createdaypassesPaymentDatabase = async (req, res) => {
     }
 };
 exports.createdaypassesPaymentDatabase = createdaypassesPaymentDatabase;
+// //function to store booking and payment and send email to the user
+// export const createBookingPaymentDatabase = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const { bookings, userDetails, paymentMethod, paymentDetails, paymentId } =
+//     req.body;
+//   console.log(req.body);
+//   //kayb hqev clbb euvv   for application
+//   // Assuming you want to map through the bookings and process each one
+//   const processBookings = async (bookings: any) => {
+//     try {
+//       // Use Promise.all to wait for all async operations to complete
+//       const bookingResults = await Promise.all(
+//         bookings.map(async (booking: any) => {
+//           // Find the location
+//           const loc = await SpaceModel.findOne({ name: booking.spaceName });
+//           if (!loc) {
+//             throw new Error("Location not found");
+//           }
+//           const newBooking = new BookingModel({
+//             user: userDetails._id,
+//             space: loc._id,
+//             companyName: userDetails.companyName,
+//             spaceName: loc.name,
+//             location: loc.location,
+//             startTime: booking.startTime,
+//             endTime: booking.endTime,
+//             date: booking.date,
+//             paymentMethod,
+//             status: paymentDetails.status,
+//           });
+//           const storeBooking = await newBooking.save();
+//           console.log(storeBooking);
+//           // Store payment
+//           const newPayment = new PaymentModel({
+//             user: userDetails._id,
+//             booking: storeBooking._id,
+//             amount: paymentDetails.amount / 100,
+//             paymentMethod,
+//             status: paymentDetails.status,
+//             paymentId,
+//           });
+//           const storePayment = await newPayment.save();
+//           console.log(storePayment);
+//           const userEmail = userDetails.email;
+//           // Read HTML template from file
+//           const templatePath = path.join(__dirname, "../utils/email.html");
+//           let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+//           // Replace placeholders with actual values
+//           const htmlContent = htmlTemplate
+//             .replace("{{name}}", userDetails.companyName)
+//             .replace("{{startTime}}", booking.startTime)
+//             .replace("{{endTime}}", booking.endTime)
+//             .replace("{{place}}", loc.name)
+//             .replace("{{date}}", booking.date);
+//           // Send confirmation email
+//           await sendEmailAdmin(
+//             userEmail,
+//             "Booking Confirmation",
+//             "Your room booking at 603 Coworking Space has been successfully confirmed.",
+//             htmlContent
+//           );
+//           return storeBooking;
+//         })
+//       );
+//       // After all bookings are processed, send a response
+//       res.status(201).json(bookingResults);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ error });
+//     }
+//   };
+//   processBookings(bookings);
+// };

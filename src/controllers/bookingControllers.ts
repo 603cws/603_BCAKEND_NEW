@@ -135,29 +135,29 @@ export const createBooking = async (req: Request, res: Response) => {
       throw new Error("User email is not defined");
     }
 
-    // const userEmail = userdet.email;
+    const userEmail = userdet.email;
 
-    // // Read HTML template from file
-    // const templatePath = path.join(__dirname, "../utils/email.html");
-    // let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    // Read HTML template from file
+    const templatePath = path.join(__dirname, "../utils/email.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
-    // // Replace placeholders with actual values
-    // const a = userdet.companyName;
-    // const htmlContent = htmlTemplate
-    //   .replace("{{name}}", a)
-    //   .replace("{{startTime}}", startTime)
-    //   .replace("{{endTime}}", endTime)
-    //   .replace("{{place}}", location)
-    //   .replace("{{date}}", date);
+    // Replace placeholders with actual values
+    const a = userdet.companyName;
+    const htmlContent = htmlTemplate
+      .replace("{{name}}", a)
+      .replace("{{startTime}}", startTime)
+      .replace("{{endTime}}", endTime)
+      .replace("{{place}}", location)
+      .replace("{{date}}", date);
 
-    // // Send confirmation email
+    // Send confirmation email
 
-    // await sendEmailAdmin(
-    //   userEmail,
-    //   "Booking Confirmation",
-    //   "Your room booking at 603 Coworking Space has been successfully confirmed.",
-    //   htmlContent
-    // );
+    await sendEmailAdmin(
+      userEmail,
+      "Booking Confirmation",
+      "Your room booking at 603 Coworking Space has been successfully confirmed.",
+      htmlContent
+    );
 
     res.status(201).json(newBooking);
   } catch (error) {
