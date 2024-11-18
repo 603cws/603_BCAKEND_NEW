@@ -25,30 +25,14 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_SECRETKEY,
 });
 
-// In-memory store to hold the order data
-const orderDataStore: Record<string, any> = {};
-
 // Route to handle order creation
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { options, bookings, daypasses, userDetails } = req.body;
+    const { options } = req.body;
     console.log(req.body);
 
     const order = await razorpay.orders.create(options);
     console.log(order);
-
-    // Store custom data in Redis using the `razorpay_order_id` as the key
-    const customData = {
-      bookings,
-      daypasses,
-      userDetails,
-    };
-    // Store custom data in-memory using the `razorpay_order_id` as the key
-    orderDataStore[order.id] = {
-      customData,
-    };
-
-    console.log(orderDataStore);
 
     if (!order) {
       return res.status(500).json({ message: "error" });
@@ -104,13 +88,6 @@ export const validateOrder = async (req: Request, res: Response) => {
           : "No description available",
       });
     }
-
-    // Retrieve custom data from the in-memory store using razorpay_order_id
-    const orderData = orderDataStore[razorpay_order_id];
-    if (!orderData) {
-      return res.status(404).json({ message: "Order not found in memory" });
-    }
-
     // Send response back with payment details
     res.status(200).json({
       msg: "Success",
@@ -118,7 +95,6 @@ export const validateOrder = async (req: Request, res: Response) => {
       paymentId: razorpay_payment_id,
       paymentMethod, // Send the payment method in the response
       paymentDetails: payment, // Optional: Send complete payment details if needed
-      customData: orderData,
     });
   } catch (error) {
     console.log(error);
