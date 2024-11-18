@@ -47,6 +47,7 @@ const paymentSchema = new mongoose_1.Schema({
         ],
         default: "pending",
     },
+    paymentId: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
 });
 exports.PaymentModel = mongoose_1.default.model("Payment", paymentSchema);

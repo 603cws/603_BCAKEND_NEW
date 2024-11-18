@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import { string } from "zod";
 
 // Payment Schema
 interface PaymentInterface extends Document {
@@ -14,6 +15,7 @@ interface PaymentInterface extends Document {
     | "authorized"
     | "success"
     | "captured";
+  paymentId: string;
   createdAt?: Date;
 }
 
@@ -39,6 +41,7 @@ const paymentSchema: Schema = new Schema<PaymentInterface>({
     ],
     default: "pending",
   },
+  paymentId: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

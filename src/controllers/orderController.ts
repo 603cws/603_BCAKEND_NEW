@@ -14,6 +14,7 @@ import fs from "fs";
 import path from "path";
 import { DayPass } from "../models/Daypassbookingmodel";
 import { PaymentModel } from "../models/payment.model";
+import { checkTimeOverlap } from "../controllers/bookingControllers";
 
 //configure
 dotenv.config();
@@ -145,102 +146,145 @@ export const storePaymentTestingApi = async (req: Request, res: Response) => {
   });
 };
 
-// //send a email
-// const userEmail = orderData.customData.userDetails.email;
+//function to store booking and payment and send email to the user
+export const createBookingPaymentDatabase = async (
+  req: Request,
+  res: Response
+) => {
+  const { bookings, userDetails, paymentMethod, paymentDetails, paymentId } =
+    req.body;
+  try {
+    // Find the location
+    const loc = await SpaceModel.findOne({ name: bookings[0].spaceName });
+    if (!loc) {
+      return res.status(404).json({ message: "Location not found" });
+    }
+    const newBooking = new BookingModel({
+      user: userDetails._id,
+      space: loc?._id,
+      companyName: userDetails.companyName,
+      spaceName: loc?.name,
+      location: loc?.location,
+      startTime: bookings[0].startTime,
+      endTime: bookings[0].endTime,
+      date: bookings[0].date,
+      paymentMethod,
+      status: paymentDetails.status,
+    });
 
-// // Read HTML template from file
-// const templatePath = path.join(__dirname, "../utils/email.html");
-// let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    const storeBooking = await newBooking.save();
 
-// // Replace placeholders with actual values
-// const companyName = orderData.customData.userDetails.companyName;
+    //store payment
+    const newPayment = new PaymentModel({
+      user: userDetails._id,
+      booking: storeBooking._id,
+      amount: paymentDetails.amount / 100,
+      paymentMethod,
+      status: paymentDetails.status,
+      paymentId,
+    });
 
-// if (orderData.customData.bookings.length !== 0) {
-//   //get space id
-//   const loc = await SpaceModel.findOne({
-//     name: orderData.customData.bookings[0].spaceName,
-//   });
-//   if (!loc) {
-//     return res.status(404).json({ message: "Location not found" });
-//   }
+    //store the payment
+    await newPayment.save();
 
-//   const newBooking = new BookingModel({
-//     user: orderData.customData.userDetails._id,
-//     space: loc?._id,
-//     companyName: orderData.customData.userDetails.companyName,
-//     spaceName: loc?.name,
-//     location: loc?.location,
-//     startTime: orderData.customData.bookings[0].startTime,
-//     endTime: orderData.customData.bookings[0].endTime,
-//     date: orderData.customData.bookings[0].date,
-//     // creditsspent: credits, //check for later
-//     paymentMethod,
-//     status: "confirmed",
-//   });
-//   const storeBooking = await newBooking.save();
+    const userEmail = userDetails.email;
 
-//   //store payment
-//   const newPayment = new PaymentModel({
-//     user: orderData.customData.userDetails._id,
-//     booking: storeBooking._id,
-//     amount: payment.amount / 100,
-//     paymentMethod,
-//     status: paymentStatus,
-//   });
+    // Read HTML template from file
+    const templatePath = path.join(__dirname, "../utils/email.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
-//   //store the payment
-//   await newPayment.save();
+    // Replace placeholders with actual values
+    const a = userDetails.companyName;
+    const htmlContent = htmlTemplate
+      .replace("{{name}}", a)
+      .replace("{{startTime}}", bookings[0].startTime)
+      .replace("{{endTime}}", bookings[0].endTime)
+      .replace("{{place}}", loc?.name)
+      .replace("{{date}}", bookings[0].date);
 
-//   const htmlContent = htmlTemplate
-//     .replace("{{name}}", companyName)
-//     .replace("{{startTime}}", orderData.customData.bookings[0].startTime)
-//     .replace("{{endTime}}", orderData.customData.bookings[0].endTime)
-//     .replace("{{place}}", loc.name)
-//     .replace("{{date}}", orderData.customData.bookings[0].date);
+    // Send confirmation email
 
-//   // Send confirmation email
+    await sendEmailAdmin(
+      userEmail,
+      "Booking Confirmation",
+      "Your room booking at 603 Coworking Space has been successfully confirmed.",
+      htmlContent
+    );
 
-//   await sendEmailAdmin(
-//     userEmail,
-//     "Booking Confirmation",
-//     "Your room booking at 603 Coworking Space has been successfully confirmed.",
-//     htmlContent
-//   );
-// }
+    res.status(201).json(newBooking);
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    res.status(500).json({ message: "Error creating booking", error });
+  }
+};
 
-// if (orderData.customData.daypasses.length !== 0) {
-//   //get space id
-//   const loc = await SpaceModel.findOne({
-//     name: orderData.customData.dayPasses[0].spaceName,
-//   });
+//function to store daypass, payment and send email to the user
+export const createdaypassesPaymentDatabase = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { daypasses, paymentDetails, paymentMethod, userDetails, paymentId } =
+      req.body;
+    //get space id
+    const loc = await SpaceModel.findOne({
+      name: daypasses[0].spaceName,
+    });
 
-//   const newDaypass = new DayPass({
-//     space: loc?._id,
-//     companyName: orderData.customData.userDetails.companyName,
-//     user: orderData.customData.userDetails._id,
-//     email: orderData.customData.userDetails.email,
-//     spaceName: loc?.name,
-//     phone: orderData.customData.userDetails.phone,
-//     bookeddate: orderData.customData.daypasses[0].bookeddate,
-//     day: orderData.customData.daypasses[0].day,
-//     month: orderData.customData.daypasses[0].month,
-//     year: orderData.customData.daypasses[0].year,
-//     status: payment.status,
-//     paymentMethod,
-//   });
+    const newDaypass = new DayPass({
+      space: loc?._id,
+      companyName: userDetails.companyName,
+      user: userDetails._id,
+      email: userDetails.email,
+      spaceName: loc?.name,
+      phone: userDetails.phone,
+      bookeddate: daypasses[0].bookeddate,
+      day: daypasses[0].day,
+      month: daypasses[0].month,
+      year: daypasses[0].year,
+      status: paymentDetails.status,
+      paymentMethod,
+    });
 
-//   const storeDaypass = await newDaypass.save();
+    const storeDaypass = await newDaypass.save();
 
-//   //store payment
-//   const newPayment = new PaymentModel({
-//     user: orderData.customData.userDetails._id,
-//     booking: storeDaypass._id,
-//     amount: payment.amount / 100,
-//     paymentMethod,
-//     status: paymentStatus,
-//   });
+    //store payment
+    const newPayment = new PaymentModel({
+      user: userDetails._id,
+      booking: storeDaypass._id,
+      amount: paymentDetails.amount / 100,
+      paymentMethod,
+      status: paymentDetails.status,
+      paymentId,
+    });
 
-//   await newPayment.save();
+    await newPayment.save();
 
-//   //send a mail to the daypass booking person
-// }
+    const userEmail = userDetails.email;
+
+    // Read HTML template from file
+    const templatePath = path.join(__dirname, "../utils/daypassEmail.html");
+    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+
+    // Replace placeholders with actual values
+    const a = userDetails.companyName;
+    const htmlContent = htmlTemplate
+      .replace("{{name}}", a)
+      .replace("{{place}}", daypasses[0].spaceName)
+      .replace("{{date}}", daypasses[0].date);
+
+    await sendEmailAdmin(
+      userEmail,
+      "Booking Confirmation",
+      "Your room booking at 603 Coworking Space has been successfully confirmed.",
+      htmlContent
+    );
+
+    res.status(201).json(newDaypass);
+  } catch (error) {
+    res.status(404).json({
+      message: "something went wrong creating daypasses &storing ",
+      error,
+    });
+  }
+};

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = exports.checkBookingAvailable = void 0;
+exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = exports.checkBookingAvailable = exports.checkTimeOverlap = void 0;
 const booking_model_1 = require("../models/booking.model");
 const emailUtils_1 = require("../utils/emailUtils");
 const user_model_1 = require("../models/user.model");
@@ -25,7 +25,7 @@ function timeTo24Hours(timeStr) {
     return `${hours}:${minutes}`;
 }
 //check time overlap function
-function checkTimeOverlap(documents, inputStartTime, inputEndTime) {
+const checkTimeOverlap = function (documents, inputStartTime, inputEndTime) {
     // Convert input times to 24-hour format for comparison
     const inputStart = timeTo24Hours(inputStartTime);
     const inputEnd = timeTo24Hours(inputEndTime);
@@ -41,7 +41,8 @@ function checkTimeOverlap(documents, inputStartTime, inputEndTime) {
         }
     }
     return false; // No overlap found
-}
+};
+exports.checkTimeOverlap = checkTimeOverlap;
 //check booking available
 const checkBookingAvailable = async (req, res) => {
     const { startTime, endTime, location, date } = req.body.appointmentDetails;
@@ -51,7 +52,7 @@ const checkBookingAvailable = async (req, res) => {
         spaceName: location,
     });
     //check is it overlaping with somebooking
-    const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
+    const isoverlap = (0, exports.checkTimeOverlap)(bookingDetails, startTime, endTime);
     //check if already booking exist
     if (isoverlap) {
         return res
@@ -70,7 +71,7 @@ const createBooking = async (req, res) => {
         spaceName: location,
     });
     // console.log(bookingDetails);
-    const isoverlap = checkTimeOverlap(bookingDetails, startTime, endTime);
+    const isoverlap = (0, exports.checkTimeOverlap)(bookingDetails, startTime, endTime);
     // console.log(isoverlap);
     try {
         if (!email) {

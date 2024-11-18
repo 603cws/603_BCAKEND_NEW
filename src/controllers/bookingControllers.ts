@@ -23,7 +23,7 @@ function timeTo24Hours(timeStr: string): string {
 }
 
 //check time overlap function
-function checkTimeOverlap(
+export const checkTimeOverlap = function (
   documents: any,
   inputStartTime: string,
   inputEndTime: string
@@ -47,7 +47,7 @@ function checkTimeOverlap(
   }
 
   return false; // No overlap found
-}
+};
 
 //check booking available
 export const checkBookingAvailable = async (req: Request, res: Response) => {
