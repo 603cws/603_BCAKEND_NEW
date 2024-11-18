@@ -171,9 +171,11 @@ const createdaypassesPaymentDatabase = async (req, res) => {
     try {
         const { daypasses, paymentDetails, paymentMethod, userDetails, paymentId } = req.body;
         //get space id
+        console.log(req.body);
         const loc = await space_model_1.SpaceModel.findOne({
             name: daypasses[0].spaceName,
         });
+        console.log(loc);
         const newDaypass = new Daypassbookingmodel_1.DayPass({
             space: loc?._id,
             companyName: userDetails.companyName,
@@ -189,10 +191,11 @@ const createdaypassesPaymentDatabase = async (req, res) => {
             paymentMethod,
         });
         const storeDaypass = await newDaypass.save();
+        console.log(storeDaypass);
         //store payment
         const newPayment = new payment_model_1.PaymentModel({
             user: userDetails._id,
-            booking: storeDaypass._id,
+            daypasses: storeDaypass._id,
             amount: paymentDetails.amount / 100,
             paymentMethod,
             status: paymentDetails.status,
@@ -209,11 +212,12 @@ const createdaypassesPaymentDatabase = async (req, res) => {
         const htmlContent = htmlTemplate
             .replace("{{name}}", a)
             .replace("{{place}}", daypasses[0].spaceName)
-            .replace("{{date}}", daypasses[0].date);
-        await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Booking Confirmation", "Your room booking at 603 Coworking Space has been successfully confirmed.", htmlContent);
+            .replace("{{date}}", daypasses[0].bookeddate);
+        await (0, emailUtils_1.sendEmailAdmin)(userEmail, "Booking Confirmation", "Your dayPass booking at 603 Coworking Space has been successfully confirmed.", htmlContent);
         res.status(201).json(newDaypass);
     }
     catch (error) {
+        console.log(error);
         res.status(404).json({
             message: "something went wrong creating daypasses &storing ",
             error,

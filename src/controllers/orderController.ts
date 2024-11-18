@@ -210,9 +210,13 @@ export const createdaypassesPaymentDatabase = async (
       req.body;
     //get space id
 
+    console.log(req.body);
+
     const loc = await SpaceModel.findOne({
       name: daypasses[0].spaceName,
     });
+
+    console.log(loc);
 
     const newDaypass = new DayPass({
       space: loc?._id,
@@ -231,10 +235,12 @@ export const createdaypassesPaymentDatabase = async (
 
     const storeDaypass = await newDaypass.save();
 
+    console.log(storeDaypass);
+
     //store payment
     const newPayment = new PaymentModel({
       user: userDetails._id,
-      booking: storeDaypass._id,
+      daypasses: storeDaypass._id,
       amount: paymentDetails.amount / 100,
       paymentMethod,
       status: paymentDetails.status,
@@ -256,17 +262,18 @@ export const createdaypassesPaymentDatabase = async (
     const htmlContent = htmlTemplate
       .replace("{{name}}", a)
       .replace("{{place}}", daypasses[0].spaceName)
-      .replace("{{date}}", daypasses[0].date);
+      .replace("{{date}}", daypasses[0].bookeddate);
 
     await sendEmailAdmin(
       userEmail,
       "Booking Confirmation",
-      "Your room booking at 603 Coworking Space has been successfully confirmed.",
+      "Your dayPass booking at 603 Coworking Space has been successfully confirmed.",
       htmlContent
     );
 
     res.status(201).json(newDaypass);
   } catch (error) {
+    console.log(error);
     res.status(404).json({
       message: "something went wrong creating daypasses &storing ",
       error,
