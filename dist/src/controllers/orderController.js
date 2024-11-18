@@ -112,6 +112,7 @@ exports.storePaymentTestingApi = storePaymentTestingApi;
 //function to store booking and payment and send email to the user
 const createBookingPaymentDatabase = async (req, res) => {
     const { bookings, userDetails, paymentMethod, paymentDetails, paymentId } = req.body;
+    console.log(req.body);
     try {
         // Find the location
         const loc = await space_model_1.SpaceModel.findOne({ name: bookings[0].spaceName });
@@ -131,6 +132,7 @@ const createBookingPaymentDatabase = async (req, res) => {
             status: paymentDetails.status,
         });
         const storeBooking = await newBooking.save();
+        console.log(storeBooking);
         //store payment
         const newPayment = new payment_model_1.PaymentModel({
             user: userDetails._id,
@@ -141,7 +143,8 @@ const createBookingPaymentDatabase = async (req, res) => {
             paymentId,
         });
         //store the payment
-        await newPayment.save();
+        const storepayment = await newPayment.save();
+        console.log(storepayment);
         const userEmail = userDetails.email;
         // Read HTML template from file
         const templatePath = path_1.default.join(__dirname, "../utils/email.html");
@@ -200,6 +203,7 @@ const createdaypassesPaymentDatabase = async (req, res) => {
         const userEmail = userDetails.email;
         // Read HTML template from file
         const templatePath = path_1.default.join(__dirname, "../utils/daypassEmail.html");
+        console.log(templatePath);
         let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         // Replace placeholders with actual values
         const a = userDetails.companyName;

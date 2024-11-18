@@ -15,6 +15,7 @@ import path from "path";
 import { DayPass } from "../models/Daypassbookingmodel";
 import { PaymentModel } from "../models/payment.model";
 import { checkTimeOverlap } from "../controllers/bookingControllers";
+import { log } from "console";
 
 //configure
 dotenv.config();
@@ -129,6 +130,9 @@ export const createBookingPaymentDatabase = async (
 ) => {
   const { bookings, userDetails, paymentMethod, paymentDetails, paymentId } =
     req.body;
+
+  console.log(req.body);
+
   try {
     // Find the location
     const loc = await SpaceModel.findOne({ name: bookings[0].spaceName });
@@ -150,6 +154,8 @@ export const createBookingPaymentDatabase = async (
 
     const storeBooking = await newBooking.save();
 
+    console.log(storeBooking);
+
     //store payment
     const newPayment = new PaymentModel({
       user: userDetails._id,
@@ -161,7 +167,9 @@ export const createBookingPaymentDatabase = async (
     });
 
     //store the payment
-    await newPayment.save();
+    const storepayment = await newPayment.save();
+
+    console.log(storepayment);
 
     const userEmail = userDetails.email;
 
@@ -203,6 +211,7 @@ export const createdaypassesPaymentDatabase = async (
     const { daypasses, paymentDetails, paymentMethod, userDetails, paymentId } =
       req.body;
     //get space id
+
     const loc = await SpaceModel.findOne({
       name: daypasses[0].spaceName,
     });
@@ -240,6 +249,8 @@ export const createdaypassesPaymentDatabase = async (
 
     // Read HTML template from file
     const templatePath = path.join(__dirname, "../utils/daypassEmail.html");
+    console.log(templatePath);
+
     let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
     // Replace placeholders with actual values

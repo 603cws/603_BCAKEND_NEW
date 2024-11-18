@@ -34,8 +34,24 @@ const bookingSchema = new mongoose_1.Schema({
     endTime: { type: String, required: true },
     creditsspent: { type: Number, default: 0 }, // Default value set to 0
     date: { type: String, required: true },
-    status: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
-    paymentMethod: { type: String, enum: ["credits", "credit_card", "paypal", "pending"], default: "pending" },
-    createdAt: { type: Date, default: Date.now }
+    status: {
+        type: String,
+        enum: [
+            "pending",
+            "confirmed",
+            "cancelled",
+            "captured",
+            "failed",
+            "refunded",
+            "authorized",
+        ],
+        default: "pending",
+    },
+    paymentMethod: {
+        type: String,
+        enum: ["credits", "credit_card", "paypal", "pending", "upi", "card"],
+        default: "pending",
+    },
+    createdAt: { type: Date, default: Date.now },
 });
 exports.BookingModel = mongoose_1.default.model("Booking", bookingSchema);

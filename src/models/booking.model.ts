@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import { Cards } from "razorpay/dist/types/cards";
 
 // Booking Schema
 interface BookingInterface extends Document {
@@ -10,8 +11,21 @@ interface BookingInterface extends Document {
   endTime: string;
   creditsspent: number;
   date: string;
-  status: "pending" | "confirmed" | "cancelled";
-  paymentMethod: "pending" | "credits" | "credit_card" | "paypal";
+  status:
+    | "pending"
+    | "confirmed"
+    | "cancelled"
+    | "captured"
+    | "failed"
+    | "refunded"
+    | "authorized";
+  paymentMethod:
+    | "pending"
+    | "credits"
+    | "credit_card"
+    | "paypal"
+    | "upi"
+    | "card";
   createdAt?: Date;
 }
 
@@ -24,9 +38,28 @@ const bookingSchema: Schema<BookingInterface> = new Schema({
   endTime: { type: String, required: true },
   creditsspent: { type: Number, default: 0 }, // Default value set to 0
   date: { type: String, required: true },
-  status: { type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending" },
-  paymentMethod: { type: String, enum: ["credits", "credit_card", "paypal", "pending"], default: "pending" },
-  createdAt: { type: Date, default: Date.now }
+  status: {
+    type: String,
+    enum: [
+      "pending",
+      "confirmed",
+      "cancelled",
+      "captured",
+      "failed",
+      "refunded",
+      "authorized",
+    ],
+    default: "pending",
+  },
+  paymentMethod: {
+    type: String,
+    enum: ["credits", "credit_card", "paypal", "pending", "upi", "card"],
+    default: "pending",
+  },
+  createdAt: { type: Date, default: Date.now },
 });
 
-export const BookingModel = mongoose.model<BookingInterface>("Booking", bookingSchema);
+export const BookingModel = mongoose.model<BookingInterface>(
+  "Booking",
+  bookingSchema
+);
