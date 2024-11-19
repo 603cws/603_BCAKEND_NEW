@@ -278,6 +278,8 @@ const createBookingPaymentDatabase = async (req, res) => {
                     // amount: paymentDetails.amount / (TotalBookings * 100),
                     amount: amountPerBooking,
                     status: paymentDetails.status,
+                    userName: userDetails.username,
+                    email: userDetails.email,
                     paymentMethod,
                     paymentId,
                 });
@@ -351,6 +353,8 @@ const createdaypassesPaymentDatabase = async (req, res) => {
                     // amount: paymentDetails.amount / (Totaldaypass * 100),
                     amount: amountPerdaypas,
                     status: paymentDetails.status,
+                    userName: userDetails.username,
+                    email: userDetails.email,
                     paymentMethod,
                     paymentId,
                 });

@@ -7,6 +7,8 @@ interface PaymentInterface extends Document {
   booking: Types.ObjectId;
   daypasses: Types.ObjectId;
   amount: number;
+  userName: String;
+  email: String;
   paymentMethod: "card" | "paypal" | "bank_transfer" | "netbanking" | "upi";
   status:
     | "pending"
@@ -24,6 +26,8 @@ const paymentSchema: Schema = new Schema<PaymentInterface>({
   booking: { type: Schema.Types.ObjectId, ref: "Booking" },
   daypasses: { type: Schema.Types.ObjectId, ref: "Daypasses" },
   amount: { type: Number, required: true },
+  userName: { type: String },
+  email: { type: String },
   paymentMethod: {
     type: String,
     enum: ["card", "paypal", "bank_transfer", "upi", "netbanking"],

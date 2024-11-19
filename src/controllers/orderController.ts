@@ -334,6 +334,8 @@ export const createBookingPaymentDatabase = async (
             // amount: paymentDetails.amount / (TotalBookings * 100),
             amount: amountPerBooking,
             status: paymentDetails.status,
+            userName: userDetails.username,
+            email: userDetails.email,
             paymentMethod,
             paymentId,
           });
@@ -430,6 +432,8 @@ export const createdaypassesPaymentDatabase = async (
             // amount: paymentDetails.amount / (Totaldaypass * 100),
             amount: amountPerdaypas,
             status: paymentDetails.status,
+            userName: userDetails.username,
+            email: userDetails.email,
             paymentMethod,
             paymentId,
           });

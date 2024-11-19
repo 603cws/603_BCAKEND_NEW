@@ -30,6 +30,8 @@ const paymentSchema = new mongoose_1.Schema({
     booking: { type: mongoose_1.Schema.Types.ObjectId, ref: "Booking" },
     daypasses: { type: mongoose_1.Schema.Types.ObjectId, ref: "Daypasses" },
     amount: { type: Number, required: true },
+    userName: { type: String },
+    email: { type: String },
     paymentMethod: {
         type: String,
         enum: ["card", "paypal", "bank_transfer", "upi", "netbanking"],
