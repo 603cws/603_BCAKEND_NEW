@@ -9,5 +9,5 @@ router.post("/validateOrder", orderController_1.validateOrder);
 router.post("/storebooking", orderController_1.createBookingPaymentDatabase);
 router.post("/storeDaypasses", orderController_1.createdaypassesPaymentDatabase);
 //testing route
-router.post("/testPaymentatore", orderController_1.storePaymentTestingApi);
+// router.post("/testPaymentatore", storePaymentTestingApi);
 exports.default = router;

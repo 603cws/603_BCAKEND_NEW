@@ -3,7 +3,7 @@ import {
   createBookingPaymentDatabase,
   createdaypassesPaymentDatabase,
   createOrder,
-  storePaymentTestingApi,
+  // storePaymentTestingApi,
   validateOrder,
 } from "../controllers/orderController";
 import { isBookingOverlap } from "../middlewares/isBookedMiddleware";
@@ -16,6 +16,6 @@ router.post("/storebooking", createBookingPaymentDatabase);
 router.post("/storeDaypasses", createdaypassesPaymentDatabase);
 
 //testing route
-router.post("/testPaymentatore", storePaymentTestingApi);
+// router.post("/testPaymentatore", storePaymentTestingApi);
 
 export default router;

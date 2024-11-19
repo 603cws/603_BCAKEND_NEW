@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
-import { string } from "zod";
+import { any, string } from "zod";
 
 // Payment Schema
 interface PaymentInterface extends Document {
