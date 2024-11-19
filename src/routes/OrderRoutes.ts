@@ -15,6 +15,8 @@ router.post("/validateOrder", validateOrder);
 router.post("/storebooking", createBookingPaymentDatabase);
 router.post("/storeDaypasses", createdaypassesPaymentDatabase);
 
+router.post("/checkOverlap", isBookingOverlap);
+
 //testing route
 // router.post("/testPaymentatore", storePaymentTestingApi);
 

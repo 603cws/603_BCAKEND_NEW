@@ -91,23 +91,6 @@ const validateOrder = async (req, res) => {
     }
 };
 exports.validateOrder = validateOrder;
-// export const storePaymentTestingApi = async (req: Request, res: Response) => {
-//   const { bookings, userDetails, amount, paymentMethod, paymentStatus } =
-//     req.body;
-//   // //store payment
-//   const newPayment = new PaymentModel({
-//     user: userDetails._id,
-//     booking: bookings._id,
-//     amount: amount / 100,
-//     paymentMethod,
-//     status: paymentStatus,
-//   });
-//   await newPayment.save();
-//   res.status(200).json({
-//     message: "success",
-//     newPayment,
-//   });
-// };
 // //function to store booking and payment and send email to the user
 // export const createBookingPaymentDatabase = async (
 //   req: Request,

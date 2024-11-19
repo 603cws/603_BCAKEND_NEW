@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { BookingModel } from "../models/booking.model";
+import { log } from "console";
 
 //convert time to 24hr basis
 function timeTo24Hours(timeStr: string): string {
@@ -42,41 +43,45 @@ function checkTimeOverlap(
   return false; // No overlap found
 }
 
-export const isBookingOverlap = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { bookings } = req.body;
+export const isBookingOverlap = async (req: Request, res: Response) => {
+  const { bookings } = req.body;
 
-    if (bookings.length === 0) {
-      next();
-    }
-    //get all the booking for that date and location
-    const bookingDetails = await BookingModel.find({
-      date: bookings.date,
-      spaceName: bookings.spaceName,
-    });
+  console.log(bookings);
+  //get all the booking for that date and location
 
-    //check if there is any overlap
-    const isoverlap = checkTimeOverlap(
-      bookingDetails,
-      bookings.startTime,
-      bookings.endTime
+  const processBookings = async (bookings: any) => {
+    const bookingResults = await Promise.all(
+      bookings.map(async (booking: any) => {
+        const bookingDetails = await BookingModel.find({
+          date: booking.date,
+          spaceName: booking.spaceName,
+        });
+
+        console.log(bookingDetails);
+
+        //check if there is any overlap
+        const isoverlap = checkTimeOverlap(
+          bookingDetails,
+          booking.startTime,
+          booking.endTime
+        );
+
+        console.log(isoverlap);
+
+        if (isoverlap) {
+          return res
+            .status(400)
+            .json({ msg: "booking already exisit in this time range" });
+        }
+
+        if (!isoverlap) {
+          return res
+            .status(200)
+            .json({ msg: "no booking for this time range" });
+        }
+      })
     );
+  };
 
-    if (isoverlap) {
-      return res
-        .status(400)
-        .json({ msg: "booking already exisit in this time range" });
-    } else {
-      next();
-    }
-  } catch (error) {
-    return res.status(400).json({
-      msg: "booking exisit in this range",
-      error: error instanceof Error ? error.message : "booking exist",
-    });
-  }
+  processBookings(bookings);
 };

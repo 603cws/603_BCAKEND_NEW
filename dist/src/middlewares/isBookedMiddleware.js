@@ -32,33 +32,32 @@ function checkTimeOverlap(documents, inputStartTime, inputEndTime) {
     }
     return false; // No overlap found
 }
-const isBookingOverlap = async (req, res, next) => {
-    try {
-        const { bookings } = req.body;
-        if (bookings.length === 0) {
-            next();
-        }
-        //get all the booking for that date and location
-        const bookingDetails = await booking_model_1.BookingModel.find({
-            date: bookings.date,
-            spaceName: bookings.spaceName,
-        });
-        //check if there is any overlap
-        const isoverlap = checkTimeOverlap(bookingDetails, bookings.startTime, bookings.endTime);
-        if (isoverlap) {
-            return res
-                .status(400)
-                .json({ msg: "booking already exisit in this time range" });
-        }
-        else {
-            next();
-        }
-    }
-    catch (error) {
-        return res.status(400).json({
-            msg: "booking exisit in this range",
-            error: error instanceof Error ? error.message : "booking exist",
-        });
-    }
+const isBookingOverlap = async (req, res) => {
+    const { bookings } = req.body;
+    console.log(bookings);
+    //get all the booking for that date and location
+    const processBookings = async (bookings) => {
+        const bookingResults = await Promise.all(bookings.map(async (booking) => {
+            const bookingDetails = await booking_model_1.BookingModel.find({
+                date: booking.date,
+                spaceName: booking.spaceName,
+            });
+            console.log(bookingDetails);
+            //check if there is any overlap
+            const isoverlap = checkTimeOverlap(bookingDetails, booking.startTime, booking.endTime);
+            console.log(isoverlap);
+            if (isoverlap) {
+                return res
+                    .status(400)
+                    .json({ msg: "booking already exisit in this time range" });
+            }
+            if (!isoverlap) {
+                return res
+                    .status(200)
+                    .json({ msg: "no booking for this time range" });
+            }
+        }));
+    };
+    processBookings(bookings);
 };
 exports.isBookingOverlap = isBookingOverlap;
