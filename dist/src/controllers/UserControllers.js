@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changeforgotpass = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
+exports.getuserDetailsByAdmin = exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changeforgotpass = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
 const user_model_1 = require("../models/user.model");
 const space_model_1 = require("../models/space.model");
 const types_1 = require("../zodTypes/types");
@@ -504,3 +504,18 @@ const dokyc = async (req, res) => {
     }
 };
 exports.dokyc = dokyc;
+//get a user by admin account
+const getuserDetailsByAdmin = async (req, res) => {
+    try {
+        const { name, email } = req.body;
+        const getUser = await user_model_1.UserModel.findOne({ email: email });
+        if (!getUser) {
+            return res.status(404).json({ msg: "user not found" });
+        }
+        res.status(200).json(getUser);
+    }
+    catch (error) {
+        res.status(404).json({ msg: "something went wrong" });
+    }
+};
+exports.getuserDetailsByAdmin = getuserDetailsByAdmin;

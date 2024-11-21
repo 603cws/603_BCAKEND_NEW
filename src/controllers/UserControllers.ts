@@ -627,3 +627,20 @@ export const dokyc = async (req: Request, res: Response) => {
     res.status(500).json({ msg: "Internal server error9" });
   }
 };
+
+//get a user by admin account
+export const getuserDetailsByAdmin = async (req: Request, res: Response) => {
+  try {
+    const { name, email } = req.body;
+
+    const getUser = await UserModel.findOne({ email: email });
+
+    if (!getUser) {
+      return res.status(404).json({ msg: "user not found" });
+    }
+
+    res.status(200).json(getUser);
+  } catch (error) {
+    res.status(404).json({ msg: "something went wrong" });
+  }
+};

@@ -19,4 +19,6 @@ router.post("/sendcallback", UserControllers_1.sendcallback);
 router.post("/contactus", UserControllers_1.contactus);
 router.post("/admin/updateuser", adminMiddleware_1.admin, UserControllers_1.updateuserbyadmin);
 router.post("/admin/deleteuser", adminMiddleware_1.admin, UserControllers_1.deleteuserbyadmin);
+//get a particular user by admin
+router.post("/getUserByAdmin", UserControllers_1.getuserDetailsByAdmin);
 exports.default = router;
