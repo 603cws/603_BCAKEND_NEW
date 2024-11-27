@@ -137,3 +137,7 @@ export const isBookingOverlap = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "Internal server error.", error });
   }
 };
+
+// https://accounts.zoho.com/oauth/v2/auth?response_type=code&client_id=1000.GGTMUUV59T01XKMLH3R6UKJ1Z1CH8D&scope=ZohoCRM.modules.ALL&redirect_uri=https://www.603thecoworkingspace.com/oauth/callback&access_type=offline
+
+//https://www.603thecoworkingspace.com/oauth/callback?code=1000.a5916b095d0d727a264a4ab96f4843b4.8a25e197f23914880edea6a765e1d31a&location=us&accounts-server=https%3A%2F%2Faccounts.zoho.com&

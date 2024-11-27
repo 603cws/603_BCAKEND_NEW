@@ -10,6 +10,8 @@ import cookie from "cookie";
 import path from "path";
 import fs from "fs";
 
+import { createLead } from "./zohoController";
+
 export const createuser = async (req: Request, res: Response) => {
   const body = req.body;
   const validate = createuserInputs.safeParse(body);
@@ -234,18 +236,30 @@ export const contactus = async (req: Request, res: Response) => {
       requirements,
     } = req.body;
 
+    let data = {
+      name,
+      phone,
+      email,
+      location,
+      company,
+      requirements,
+      specifications,
+    };
+
+    await createLead(data);
+
     const templatePath = path.join(__dirname, "../utils/contactus.html");
     let htmlTemplate = fs.readFileSync(templatePath, "utf8");
 
     const a = name;
     const htmlContent = htmlTemplate.replace("{{name}}", a);
 
-    await sendEmailSales(
-      email,
-      "Your CallBack request has been sent",
-      "Your request has been successfully confirmed.",
-      htmlContent
-    );
+    // await sendEmailSales(
+    //   email,
+    //   "Your CallBack request has been sent",
+    //   "Your request has been successfully confirmed.",
+    //   htmlContent
+    // );
 
     const templatePath2 = path.join(__dirname, "../utils/callbackadmin.html");
     let htmlTemplate2 = fs.readFileSync(templatePath2, "utf8");
@@ -260,12 +274,12 @@ export const contactus = async (req: Request, res: Response) => {
       .replace("{{Specifications}}", specifications)
       .replace("{{requirements}}", requirements);
 
-    await sendEmailSales(
-      sales,
-      "Customer is trying to contact",
-      "A customer has raised a contact request.",
-      htmlContent2
-    );
+    // await sendEmailSales(
+    //   sales,
+    //   "Customer is trying to contact",
+    //   "A customer has raised a contact request.",
+    //   htmlContent2
+    // );
 
     res
       .status(200)

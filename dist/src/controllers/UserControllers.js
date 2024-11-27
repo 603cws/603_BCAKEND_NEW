@@ -14,6 +14,7 @@ const emailUtils_1 = require("../utils/emailUtils");
 const cookie_1 = __importDefault(require("cookie"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const zohoController_1 = require("./zohoController");
 const createuser = async (req, res) => {
     const body = req.body;
     const validate = types_1.createuserInputs.safeParse(body);
@@ -182,11 +183,26 @@ const contactus = async (req, res) => {
     try {
         const sales = process.env.EMAIL_SALES || "";
         const { name, phone, email, location, seats, company, specifications, requirements, } = req.body;
+        let data = {
+            name,
+            phone,
+            email,
+            location,
+            company,
+            requirements,
+            specifications,
+        };
+        await (0, zohoController_1.createLead)(data);
         const templatePath = path_1.default.join(__dirname, "../utils/contactus.html");
         let htmlTemplate = fs_1.default.readFileSync(templatePath, "utf8");
         const a = name;
         const htmlContent = htmlTemplate.replace("{{name}}", a);
-        await (0, emailUtils_1.sendEmailSales)(email, "Your CallBack request has been sent", "Your request has been successfully confirmed.", htmlContent);
+        // await sendEmailSales(
+        //   email,
+        //   "Your CallBack request has been sent",
+        //   "Your request has been successfully confirmed.",
+        //   htmlContent
+        // );
         const templatePath2 = path_1.default.join(__dirname, "../utils/callbackadmin.html");
         let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, "utf8");
         const htmlContent2 = htmlTemplate2
@@ -198,7 +214,12 @@ const contactus = async (req, res) => {
             .replace("{{seats}}", seats)
             .replace("{{Specifications}}", specifications)
             .replace("{{requirements}}", requirements);
-        await (0, emailUtils_1.sendEmailSales)(sales, "Customer is trying to contact", "A customer has raised a contact request.", htmlContent2);
+        // await sendEmailSales(
+        //   sales,
+        //   "Customer is trying to contact",
+        //   "A customer has raised a contact request.",
+        //   htmlContent2
+        // );
         res
             .status(200)
             .json({ msg: "Request sent to both user and admin successfully!" });
