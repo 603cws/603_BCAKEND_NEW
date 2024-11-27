@@ -1,23 +1,23 @@
-import { Request, Response } from "express";
-import { UserModel } from "../models/user.model";
-import { SpaceModel } from "../models/space.model";
-import { createuserInputs } from "../zodTypes/types";
-import { kycmodel } from "../models/kyc.model";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import { sendEmailAdmin, sendEmailSales } from "../utils/emailUtils";
-import cookie from "cookie";
-import path from "path";
-import fs from "fs";
+import { Request, Response } from 'express';
+import { UserModel } from '../models/user.model';
+import { SpaceModel } from '../models/space.model';
+import { createuserInputs } from '../zodTypes/types';
+import { kycmodel } from '../models/kyc.model';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import { sendEmailAdmin, sendEmailSales } from '../utils/emailUtils';
+import cookie from 'cookie';
+import path from 'path';
+import fs from 'fs';
 
-import { createLead } from "./zohoController";
+// import { createLead } from './zohoController';
 
 export const createuser = async (req: Request, res: Response) => {
   const body = req.body;
   const validate = createuserInputs.safeParse(body);
 
   if (!validate.success) {
-    return res.status(400).json({ msg: "Invalid Inputs" });
+    return res.status(400).json({ msg: 'Invalid Inputs' });
   }
 
   try {
@@ -37,12 +37,12 @@ export const createuser = async (req: Request, res: Response) => {
 
     const usernameExists = await UserModel.findOne({ username });
     if (usernameExists) {
-      return res.status(409).json({ msg: "Username exists" });
+      return res.status(409).json({ msg: 'Username exists' });
     }
 
     const emailExists = await UserModel.findOne({ email });
     if (emailExists) {
-      return res.status(409).json({ msg: "Email exists" });
+      return res.status(409).json({ msg: 'Email exists' });
     }
 
     // Hash the password
@@ -53,7 +53,7 @@ export const createuser = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       phone,
-      role: "user",
+      role: 'user',
       kyc: false,
       country,
       state,
@@ -67,20 +67,20 @@ export const createuser = async (req: Request, res: Response) => {
 
     const secretKey = process.env.SECRETKEY;
     if (!secretKey) {
-      console.error("JWT secret key is not defined");
-      return res.status(500).json({ msg: "JWT secret key is not defined" });
+      console.error('JWT secret key is not defined');
+      return res.status(500).json({ msg: 'JWT secret key is not defined' });
     }
 
     const token = jwt.sign({ id: user._id, companyName }, secretKey, {
-      expiresIn: "1h",
+      expiresIn: '1h',
     });
 
     return res
       .status(201)
-      .json({ msg: "User created", jwt: token, user: user.companyName });
+      .json({ msg: 'User created', jwt: token, user: user.companyName });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ msg: "Internal server error1" });
+    res.status(500).json({ msg: 'Internal server error1' });
   }
 };
 
@@ -88,82 +88,82 @@ export const createuser = async (req: Request, res: Response) => {
 export const getuserdetailsorig = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
 
   try {
-    const cookies = cookie.parse(req.headers.cookie || "");
-    console.log("jsdodckj   ", req.headers);
+    const cookies = cookie.parse(req.headers.cookie || '');
+    console.log('jsdodckj   ', req.headers);
     const token = cookies.token;
     console.log(token);
 
     const decoded: any = jwt.verify(token, secretKey);
-    console.log("Decoded token:", decoded);
+    console.log('Decoded token:', decoded);
 
     const id = decoded.id;
-    console.log("User ID from token:", id);
+    console.log('User ID from token:', id);
 
     const user = await UserModel.findById(id);
-    console.log("User from database:", user);
+    console.log('User from database:', user);
     if (!user) {
-      return res.status(404).json({ msg: "No such user" });
+      return res.status(404).json({ msg: 'No such user' });
     }
     res.status(200).json({ user: user });
   } catch (e) {
-    res.status(500).json({ msg: "Internal server error2" });
+    res.status(500).json({ msg: 'Internal server error2' });
   }
 };
 
 export const getuserdetails = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
 
   try {
-    const cookies = cookie.parse(req.headers.cookie || "");
-    console.log("jsdodckj   ", req.headers);
+    const cookies = cookie.parse(req.headers.cookie || '');
+    console.log('jsdodckj   ', req.headers);
     const token = cookies.token;
     console.log(token);
     if (!token) {
-      return res.status(401).json({ msg: "Token is missing" });
+      return res.status(401).json({ msg: 'Token is missing' });
     }
 
     const decoded: any = jwt.verify(token, secretKey);
-    console.log("Decoded token:", decoded);
+    console.log('Decoded token:', decoded);
 
     const id = decoded.id;
-    console.log("User ID from token:", id);
+    console.log('User ID from token:', id);
 
     const user = await UserModel.findById(id);
-    console.log("User from database:", user);
+    console.log('User from database:', user);
 
     if (!user) {
-      return res.status(404).json({ msg: "No such user" });
+      return res.status(404).json({ msg: 'No such user' });
     }
 
     res.status(200).json({ user });
   } catch (e) {
-    console.error("Error:", e);
-    res.status(500).json({ msg: "Internal server error" });
+    console.error('Error:', e);
+    res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
 export const checkauth = async (req: Request, res: Response) => {
   try {
-    const cookies = cookie.parse(req.headers.cookie || "");
+    const cookies = cookie.parse(req.headers.cookie || '');
     const token = cookies.token;
     const secretKey = process.env.SECRETKEY;
 
     if (!secretKey) {
-      console.error("JWT secret key is not defined");
-      return res.status(500).json({ msg: "JWT secret key is not defined" });
+      console.error('JWT secret key is not defined');
+      return res.status(500).json({ msg: 'JWT secret key is not defined' });
     }
 
     if (!token) {
-      return res.status(401).json({ auth: false, user: "user" });
+      return res.status(401).json({ auth: false, user: 'user' });
     }
 
     const decoded = jwt.verify(token, secretKey) as jwt.JwtPayload;
@@ -171,60 +171,60 @@ export const checkauth = async (req: Request, res: Response) => {
     // Assuming user.role is the role you want to check
     return res.status(200).json({ auth: true, user: decoded.role });
   } catch (error) {
-    console.error("Error in authentication:", error);
+    console.error('Error in authentication:', error);
     res
       .status(500)
-      .json({ msg: "Internal server error", auth: false, user: "user" });
+      .json({ msg: 'Internal server error', auth: false, user: 'user' });
   }
 };
 
 export const sendcallback = async (req: Request, res: Response) => {
   try {
-    const sales = process.env.EMAIL_SALES || "";
+    const sales = process.env.EMAIL_SALES || '';
     const { email, name, phone, company, requirements } = req.body;
 
-    const templatePath = path.join(__dirname, "../utils/callbackuser.html");
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    const templatePath = path.join(__dirname, '../utils/callbackuser.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     const a = name;
-    const htmlContent = htmlTemplate.replace("{{name}}", a);
+    const htmlContent = htmlTemplate.replace('{{name}}', a);
 
     await sendEmailSales(
       email,
-      "Your CallBack request has been sent",
-      "Your request has been successfully confirmed.",
+      'Your CallBack request has been sent',
+      'Your request has been successfully confirmed.',
       htmlContent
     );
 
-    const templatePath2 = path.join(__dirname, "../utils/callbackadmin.html");
-    let htmlTemplate2 = fs.readFileSync(templatePath2, "utf8");
+    const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
+    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
 
     const htmlContent2 = htmlTemplate2
-      .replace("{{name}}", a)
-      .replace("{{phone}}", phone)
-      .replace("{{email}}", email)
-      .replace("{{company}}", company)
-      .replace("{{requirements}}", requirements);
+      .replace('{{name}}', a)
+      .replace('{{phone}}', phone)
+      .replace('{{email}}', email)
+      .replace('{{company}}', company)
+      .replace('{{requirements}}', requirements);
 
     await sendEmailSales(
       sales,
-      "CallBack request recieved",
-      "A callback request has been recieved.",
+      'CallBack request recieved',
+      'A callback request has been recieved.',
       htmlContent2
     );
 
     res
       .status(200)
-      .json({ msg: "Request sent to both user and admin successfully!" });
+      .json({ msg: 'Request sent to both user and admin successfully!' });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ msg: "Internal server error3" });
+    res.status(500).json({ msg: 'Internal server error3' });
   }
 };
 
 export const contactus = async (req: Request, res: Response) => {
   try {
-    const sales = process.env.EMAIL_SALES || "";
+    const sales = process.env.EMAIL_SALES || '';
     const {
       name,
       phone,
@@ -246,57 +246,57 @@ export const contactus = async (req: Request, res: Response) => {
       specifications,
     };
 
-    await createLead(data);
+    // await createLead(data);
 
-    const templatePath = path.join(__dirname, "../utils/contactus.html");
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    const templatePath = path.join(__dirname, '../utils/contactus.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     const a = name;
-    const htmlContent = htmlTemplate.replace("{{name}}", a);
+    const htmlContent = htmlTemplate.replace('{{name}}', a);
 
-    // await sendEmailSales(
-    //   email,
-    //   "Your CallBack request has been sent",
-    //   "Your request has been successfully confirmed.",
-    //   htmlContent
-    // );
+    await sendEmailSales(
+      email,
+      'Your CallBack request has been sent',
+      'Your request has been successfully confirmed.',
+      htmlContent
+    );
 
-    const templatePath2 = path.join(__dirname, "../utils/callbackadmin.html");
-    let htmlTemplate2 = fs.readFileSync(templatePath2, "utf8");
+    const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
+    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
 
     const htmlContent2 = htmlTemplate2
-      .replace("{{name}}", a)
-      .replace("{{phone}}", phone)
-      .replace("{{email}}", email)
-      .replace("{{pref}}", location)
-      .replace("{{company}}", company)
-      .replace("{{seats}}", seats)
-      .replace("{{Specifications}}", specifications)
-      .replace("{{requirements}}", requirements);
+      .replace('{{name}}', a)
+      .replace('{{phone}}', phone)
+      .replace('{{email}}', email)
+      .replace('{{pref}}', location)
+      .replace('{{company}}', company)
+      .replace('{{seats}}', seats)
+      .replace('{{Specifications}}', specifications)
+      .replace('{{requirements}}', requirements);
 
-    // await sendEmailSales(
-    //   sales,
-    //   "Customer is trying to contact",
-    //   "A customer has raised a contact request.",
-    //   htmlContent2
-    // );
+    await sendEmailSales(
+      sales,
+      'Customer is trying to contact',
+      'A customer has raised a contact request.',
+      htmlContent2
+    );
 
     res
       .status(200)
-      .json({ msg: "Request sent to both user and admin successfully!" });
+      .json({ msg: 'Request sent to both user and admin successfully!' });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ msg: "Internal server error3" });
+    res.status(500).json({ msg: 'Internal server error3' });
   }
 };
 
 // Function to get all users
 export const getusers = async (req: Request, res: Response) => {
   try {
-    const users = await UserModel.find({ role: "user" });
+    const users = await UserModel.find({ role: 'user' });
     res.status(200).json({ msg: users });
   } catch (err) {
-    res.status(500).json({ msg: "Internal server error3" });
+    res.status(500).json({ msg: 'Internal server error3' });
   }
 };
 
@@ -306,11 +306,11 @@ export const userbyid = async (req: Request, res: Response) => {
   try {
     const user = await UserModel.findById(id);
     if (!user) {
-      return res.status(404).json({ msg: "No such user" });
+      return res.status(404).json({ msg: 'No such user' });
     }
     res.status(200).json({ msg: user });
   } catch (e) {
-    res.status(500).json({ msg: "Internal server error4edoj" });
+    res.status(500).json({ msg: 'Internal server error4edoj' });
   }
 };
 
@@ -320,45 +320,45 @@ export const deleteuser = async (req: Request, res: Response) => {
   try {
     const user = await UserModel.findById(id);
     if (!user) {
-      return res.status(404).json({ msg: "No such user" });
+      return res.status(404).json({ msg: 'No such user' });
     }
     await UserModel.deleteOne({ _id: id });
-    res.status(200).json({ msg: "User deleted" });
+    res.status(200).json({ msg: 'User deleted' });
   } catch (e) {
-    res.status(500).json({ msg: "Internal server error5" });
+    res.status(500).json({ msg: 'Internal server error5' });
   }
 };
 
 // Function to change password by user
 export const changepasswordbyuser = async (req: Request, res: Response) => {
-  console.log("djeodjopkpk");
+  console.log('djeodjopkpk');
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
-  const cookies = cookie.parse(req.headers.cookie || "");
-  console.log("jsdodckj   ", req.headers);
+  const cookies = cookie.parse(req.headers.cookie || '');
+  console.log('jsdodckj   ', req.headers);
   const token = cookies.token;
   console.log(token);
   const { newPassword, oldPassword } = req.body;
 
   try {
     const decoded: any = jwt.verify(token, secretKey);
-    console.log("Decoded token:", decoded);
+    console.log('Decoded token:', decoded);
 
     const id = decoded.id;
-    console.log("User ID from token:", id);
+    console.log('User ID from token:', id);
 
     const user = await UserModel.findById(id);
-    console.log("User from database:", user);
+    console.log('User from database:', user);
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: 'User not found' });
     }
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
-      return res.status(401).json({ msg: "Old password is incorrect" });
+      return res.status(401).json({ msg: 'Old password is incorrect' });
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
@@ -367,47 +367,47 @@ export const changepasswordbyuser = async (req: Request, res: Response) => {
     const userEmail = user.email;
 
     // Read HTML template from file
-    const templatePath = path.join(__dirname, "../utils/passwordchange.html");
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    const templatePath = path.join(__dirname, '../utils/passwordchange.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
     const a = user.companyName;
-    const htmlContent = htmlTemplate.replace("{{name}}", a);
+    const htmlContent = htmlTemplate.replace('{{name}}', a);
 
     // Send confirmation email
     await sendEmailAdmin(
       userEmail,
-      "Password Changed Successfully",
-      "Your password has been changed successfully.",
+      'Password Changed Successfully',
+      'Your password has been changed successfully.',
       htmlContent
     );
 
     await user.save();
-    res.status(200).json({ msg: "Password changed successfully" });
+    res.status(200).json({ msg: 'Password changed successfully' });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ msg: "Internal server error6" });
+    res.status(500).json({ msg: 'Internal server error6' });
   }
 };
 
 export const changeforgotpass = async (req: Request, res: Response) => {
-  console.log("djeodjopkpk");
+  console.log('djeodjopkpk');
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
   const { token, password } = req.body;
 
   try {
     const decoded: any = jwt.verify(token, secretKey);
-    console.log("Decoded token:", decoded);
+    console.log('Decoded token:', decoded);
 
     const email = decoded.email;
-    console.log("User email from token:", email);
+    console.log('User email from token:', email);
 
     const user = await UserModel.findOne({ email: email });
-    console.log("User from database:", user);
+    console.log('User from database:', user);
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: 'User not found' });
     }
 
     const hashedNewPassword = await bcrypt.hash(password, 10);
@@ -415,29 +415,29 @@ export const changeforgotpass = async (req: Request, res: Response) => {
 
     const userEmail = user.email;
 
-    const templatePath = path.join(__dirname, "../utils/passwordchange.html");
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    const templatePath = path.join(__dirname, '../utils/passwordchange.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
     const companyName = user.companyName;
-    const htmlContent = htmlTemplate.replace("{{name}}", companyName);
+    const htmlContent = htmlTemplate.replace('{{name}}', companyName);
 
     await sendEmailAdmin(
       userEmail,
-      "Password Changed Successfully",
-      "Your password has been changed successfully.",
+      'Password Changed Successfully',
+      'Your password has been changed successfully.',
       htmlContent
     );
     await user.save();
-    res.status(200).json({ msg: "Password changed successfully" });
+    res.status(200).json({ msg: 'Password changed successfully' });
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
-      console.error("Token has expired:", e.message);
-      return res.status(401).json({ msg: "Token has expired" });
+      console.error('Token has expired:', e.message);
+      return res.status(401).json({ msg: 'Token has expired' });
     } else if (e instanceof jwt.JsonWebTokenError) {
-      console.error("Invalid token:", e.message);
-      return res.status(401).json({ msg: "Invalid token" });
+      console.error('Invalid token:', e.message);
+      return res.status(401).json({ msg: 'Invalid token' });
     } else {
-      console.error("Error during password change:", e);
-      return res.status(500).json({ msg: "Internal server error" });
+      console.error('Error during password change:', e);
+      return res.status(500).json({ msg: 'Internal server error' });
     }
   }
 };
@@ -446,46 +446,46 @@ export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
   try {
     const user = await UserModel.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: 'User not found' });
     }
 
     const token = jwt.sign(
       { email: email }, // Minimized payload
       secretKey, // Keep the key secure, consider its length if appropriate
-      { algorithm: "HS384", expiresIn: "5m" } // Token expires in 3 minutes
+      { algorithm: 'HS384', expiresIn: '5m' } // Token expires in 3 minutes
     );
 
     const link = `https://www.603thecoworkingspace.com/changepassword/${token}`;
-    const templatePath = path.join(__dirname, "../utils/forgotpass.html");
+    const templatePath = path.join(__dirname, '../utils/forgotpass.html');
 
     // Read HTML template
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     // Replace placeholders in template
     const htmlContent = htmlTemplate
-      .replace("{{name}}", email)
-      .replace("{{link}}", link); // Ensure 'link' is used here
+      .replace('{{name}}', email)
+      .replace('{{link}}', link); // Ensure 'link' is used here
 
     // Send confirmation email
     await sendEmailAdmin(
       email,
-      "Password Reset Request",
-      "Please use the link below to reset your password.",
+      'Password Reset Request',
+      'Please use the link below to reset your password.',
       htmlContent
     );
 
     return res
       .status(200)
-      .json({ msg: "Password reset link sent successfully!" });
+      .json({ msg: 'Password reset link sent successfully!' });
   } catch (error) {
-    console.error("Error in forgotPassword function:", error);
-    return res.status(500).json({ msg: "Internal server error" });
+    console.error('Error in forgotPassword function:', error);
+    return res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
@@ -493,12 +493,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
 export const updateuser = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
   try {
-    const cookies = cookie.parse(req.headers.cookie || "");
-    console.log("jsdodckj   ", req.headers);
+    const cookies = cookie.parse(req.headers.cookie || '');
+    console.log('jsdodckj   ', req.headers);
     const token = cookies.token;
     console.log(token);
     const { companyName, country, state, city, zipCode } = req.body;
@@ -506,7 +506,7 @@ export const updateuser = async (req: Request, res: Response) => {
     const user = await UserModel.findById(decoded.id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: 'User not found' });
     }
 
     user.companyName = companyName;
@@ -517,18 +517,18 @@ export const updateuser = async (req: Request, res: Response) => {
 
     await user.save();
 
-    res.status(200).json({ msg: "User updated" });
+    res.status(200).json({ msg: 'User updated' });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ msg: "Internal server error" });
+    console.error('Error updating user:', error);
+    res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
 export const updateuserbyadmin = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
   try {
     const {
@@ -546,7 +546,7 @@ export const updateuserbyadmin = async (req: Request, res: Response) => {
     const user = await UserModel.findById(id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: 'User not found' });
     }
 
     user.companyName = companyName;
@@ -561,54 +561,54 @@ export const updateuserbyadmin = async (req: Request, res: Response) => {
 
     await user.save();
 
-    res.status(200).json({ msg: "User updated" });
+    res.status(200).json({ msg: 'User updated' });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ msg: "Internal server error26" });
+    console.error('Error updating user:', error);
+    res.status(500).json({ msg: 'Internal server error26' });
   }
 };
 
 export const deleteuserbyadmin = async (req: Request, res: Response) => {
   const secretKey = process.env.SECRETKEY;
   if (!secretKey) {
-    console.error("JWT secret key is not defined");
-    return res.status(500).json({ msg: "JWT secret key is not defined" });
+    console.error('JWT secret key is not defined');
+    return res.status(500).json({ msg: 'JWT secret key is not defined' });
   }
   try {
     const { id } = req.body;
     const user = await UserModel.findByIdAndDelete(id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: 'User not found' });
     }
 
-    res.status(200).json({ msg: "User deleted" });
+    res.status(200).json({ msg: 'User deleted' });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ msg: "Internal server error26" });
+    console.error('Error updating user:', error);
+    res.status(500).json({ msg: 'Internal server error26' });
   }
 };
 
 export const allusersbyadmin = async (req: Request, res: Response) => {
   try {
-    const totalUsers = await UserModel.find({ role: "user" }).sort({
+    const totalUsers = await UserModel.find({ role: 'user' }).sort({
       createdAt: -1,
     });
-    const totaladmin = await UserModel.find({ role: "admin" }).sort({
+    const totaladmin = await UserModel.find({ role: 'admin' }).sort({
       createdAt: -1,
     });
 
     const allworkspaces = await SpaceModel.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
-      msg: "details",
+      msg: 'details',
       totalUsers,
       totaladmin,
       allworkspaces,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
@@ -636,9 +636,9 @@ export const dokyc = async (req: Request, res: Response) => {
       companyname,
     });
     await UserModel.findOneAndUpdate({ name: user }, { kyc: true });
-    res.status(200).json({ msg: "KYC Completed" });
+    res.status(200).json({ msg: 'KYC Completed' });
   } catch (e) {
-    res.status(500).json({ msg: "Internal server error9" });
+    res.status(500).json({ msg: 'Internal server error9' });
   }
 };
 
@@ -650,11 +650,11 @@ export const getuserDetailsByAdmin = async (req: Request, res: Response) => {
     const getUser = await UserModel.findOne({ email: email });
 
     if (!getUser) {
-      return res.status(404).json({ msg: "user not found" });
+      return res.status(404).json({ msg: 'user not found' });
     }
 
     res.status(200).json(getUser);
   } catch (error) {
-    res.status(404).json({ msg: "something went wrong" });
+    res.status(404).json({ msg: 'something went wrong' });
   }
 };
