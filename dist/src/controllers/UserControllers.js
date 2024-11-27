@@ -14,7 +14,7 @@ const emailUtils_1 = require("../utils/emailUtils");
 const cookie_1 = __importDefault(require("cookie"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-// import { createLead } from './zohoController';
+const zohoController_1 = require("./zohoController");
 const createuser = async (req, res) => {
     const body = req.body;
     const validate = types_1.createuserInputs.safeParse(body);
@@ -157,6 +157,14 @@ const sendcallback = async (req, res) => {
         const { email, name, phone, company, requirements } = req.body;
         const templatePath = path_1.default.join(__dirname, '../utils/callbackuser.html');
         let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        let data = {
+            name,
+            email,
+            phone,
+            company,
+            requirements,
+        };
+        await (0, zohoController_1.createLeadPopupForm)(data);
         const a = name;
         const htmlContent = htmlTemplate.replace('{{name}}', a);
         await (0, emailUtils_1.sendEmailSales)(email, 'Your CallBack request has been sent', 'Your request has been successfully confirmed.', htmlContent);
@@ -192,7 +200,7 @@ const contactus = async (req, res) => {
             requirements,
             specifications,
         };
-        // await createLead(data);
+        await (0, zohoController_1.createLead)(data);
         const templatePath = path_1.default.join(__dirname, '../utils/contactus.html');
         let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
         const a = name;

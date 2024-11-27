@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getlayouts = exports.createLead = void 0;
+exports.getlayouts = exports.createLeadPopupForm = exports.createLead = void 0;
 const axios_1 = __importDefault(require("axios"));
 // const access_token = require("./../../index");
 const ZOHO_TOKEN_URL = 'https://accounts.zoho.com/oauth/v2/token';
@@ -123,6 +123,13 @@ const getAccessToken = async () => {
 //     console.error("Error creating lead:", error);
 //   }
 // };
+const now = new Date();
+const month = now.getMonth() + 1;
+const year = now.getFullYear();
+const date = now.getDate();
+const hours = now.getHours();
+const minutes = now.getMinutes();
+const seconds = now.getSeconds();
 // Function to use the access token in an API request to Zoho CRM for contact form
 const createLead = async (data) => {
     try {
@@ -136,15 +143,6 @@ const createLead = async (data) => {
         //split username
         const [First_Name, Last_Name] = name.split(' ');
         //date
-        const now = new Date();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
-        const date = now.getDate();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-        const seconds = now.getSeconds();
-        let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
-        console.log(Date_Time_4);
         const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
         const leadData = {
             data: [
@@ -155,8 +153,8 @@ const createLead = async (data) => {
                     Phone: '9594111101',
                     LEAD_LOCATION: location,
                     // Date_Time_4: '2024-11-27T11:40:30+06:00',
-                    Date_Time_4,
-                    // Date_TIme_4: `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30'`,
+                    Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+06:00`,
+                    // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
                     Lead_Requirement,
                     Company,
                     specifications,
@@ -180,6 +178,53 @@ const createLead = async (data) => {
     }
 };
 exports.createLead = createLead;
+// Function to use the access token in an API request to Zoho CRM for contact form
+const createLeadPopupForm = async (data) => {
+    try {
+        const accessToken = await getAccessToken();
+        console.log(accessToken);
+        const { name, Phone: phone, Email: email, company, requirements } = data;
+        console.log(data);
+        // let Location = location;
+        let Company = company;
+        let Lead_Requirement = requirements;
+        //split username
+        const [First_Name, Last_Name] = name.split(' ');
+        //date
+        // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
+        // console.log(Date_Time_4);
+        const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
+        const leadData = {
+            data: [
+                {
+                    First_Name: 'yuvraj',
+                    Last_Name: 'manchadi',
+                    Email: 'manchadi321@gmail.com',
+                    Phone: '9594111101',
+                    // Date_Time_4: '2024-11-27T11:40:30+06:00',
+                    Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+05:30`,
+                    Lead_Requirement,
+                    Company,
+                    layout: {
+                        id: '3269090000016654005',
+                    },
+                },
+            ],
+        };
+        const response = await axios_1.default.post(zohoCRMUrl, leadData, {
+            headers: {
+                Authorization: `Zoho-oauthtoken ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log('Lead created successfully:', response.data);
+        console.log(response.data.data[0].details);
+    }
+    catch (error) {
+        console.error('Error creating lead:', error);
+    }
+};
+exports.createLeadPopupForm = createLeadPopupForm;
 const getlayouts = async (req, res) => {
     try {
         const accessToken = await getAccessToken();

@@ -152,6 +152,14 @@ const getAccessToken = async () => {
 //   }
 // };
 
+const now = new Date();
+const month = now.getMonth() + 1;
+const year = now.getFullYear();
+const date = now.getDate();
+const hours = now.getHours();
+const minutes = now.getMinutes();
+const seconds = now.getSeconds();
+
 // Function to use the access token in an API request to Zoho CRM for contact form
 export const createLead = async (data: any) => {
   try {
@@ -180,20 +188,6 @@ export const createLead = async (data: any) => {
 
     //date
 
-    const now = new Date();
-
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-
-    const date = now.getDate();
-
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-
-    let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
-    console.log(Date_Time_4);
-
     const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
     const leadData = {
       data: [
@@ -204,11 +198,66 @@ export const createLead = async (data: any) => {
           Phone: '9594111101',
           LEAD_LOCATION: location,
           // Date_Time_4: '2024-11-27T11:40:30+06:00',
-          Date_Time_4,
-          // Date_TIme_4: `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30'`,
+          Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+06:00`,
+          // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
           Lead_Requirement,
           Company,
           specifications,
+          layout: {
+            id: '3269090000016654005',
+          },
+        },
+      ],
+    };
+
+    const response = await axios.post(zohoCRMUrl, leadData, {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Lead created successfully:', response.data);
+    console.log(response.data.data[0].details);
+  } catch (error) {
+    console.error('Error creating lead:', error);
+  }
+};
+
+// Function to use the access token in an API request to Zoho CRM for contact form
+export const createLeadPopupForm = async (data: any) => {
+  try {
+    const accessToken = await getAccessToken();
+    console.log(accessToken);
+
+    const { name, Phone: phone, Email: email, company, requirements } = data;
+
+    console.log(data);
+
+    // let Location = location;
+    let Company = company;
+    let Lead_Requirement = requirements;
+
+    //split username
+
+    const [First_Name, Last_Name] = name.split(' ');
+    //date
+
+    // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
+    // console.log(Date_Time_4);
+
+    const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
+    const leadData = {
+      data: [
+        {
+          First_Name: 'yuvraj',
+          Last_Name: 'manchadi',
+          Email: 'manchadi321@gmail.com',
+          Phone: '9594111101',
+          // Date_Time_4: '2024-11-27T11:40:30+06:00',
+          Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+05:30`,
+          Lead_Requirement,
+          Company,
           layout: {
             id: '3269090000016654005',
           },

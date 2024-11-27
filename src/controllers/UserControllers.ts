@@ -10,7 +10,7 @@ import cookie from 'cookie';
 import path from 'path';
 import fs from 'fs';
 
-// import { createLead } from './zohoController';
+import { createLead, createLeadPopupForm } from './zohoController';
 
 export const createuser = async (req: Request, res: Response) => {
   const body = req.body;
@@ -186,6 +186,16 @@ export const sendcallback = async (req: Request, res: Response) => {
     const templatePath = path.join(__dirname, '../utils/callbackuser.html');
     let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
+    let data = {
+      name,
+      email,
+      phone,
+      company,
+      requirements,
+    };
+
+    await createLeadPopupForm(data);
+
     const a = name;
     const htmlContent = htmlTemplate.replace('{{name}}', a);
 
@@ -246,7 +256,7 @@ export const contactus = async (req: Request, res: Response) => {
       specifications,
     };
 
-    // await createLead(data);
+    await createLead(data);
 
     const templatePath = path.join(__dirname, '../utils/contactus.html');
     let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
