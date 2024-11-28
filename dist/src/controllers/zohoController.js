@@ -135,11 +135,13 @@ const createLead = async (data) => {
     try {
         const accessToken = await getAccessToken();
         console.log(accessToken);
-        const { name, Phone: phone, Email: email, location, company, requirements, specifications, } = data;
+        const { name, phone, email, location, company, requirements, specifications, } = data;
         console.log(data);
         // let Location = location;
         let Company = company;
         let Lead_Requirement = requirements;
+        let Email = email;
+        let Phone = phone;
         //split username
         const [First_Name, Last_Name] = name.split(' ');
         //date
@@ -147,10 +149,10 @@ const createLead = async (data) => {
         const leadData = {
             data: [
                 {
-                    First_Name: 'yuvraj',
-                    Last_Name: 'manchadi',
-                    Email: 'manchadi321@gmail.com',
-                    Phone: '9594111101',
+                    First_Name,
+                    Last_Name,
+                    Email,
+                    Phone,
                     LEAD_LOCATION: location,
                     // Date_Time_4: '2024-11-27T11:40:30+06:00',
                     Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+06:00`,
@@ -183,11 +185,13 @@ const createLeadPopupForm = async (data) => {
     try {
         const accessToken = await getAccessToken();
         console.log(accessToken);
-        const { name, Phone: phone, Email: email, company, requirements } = data;
+        const { name, phone, email, company, requirements } = data;
         console.log(data);
         // let Location = location;
         let Company = company;
         let Lead_Requirement = requirements;
+        let Email = email;
+        let Phone = phone;
         //split username
         const [First_Name, Last_Name] = name.split(' ');
         //date
@@ -197,10 +201,10 @@ const createLeadPopupForm = async (data) => {
         const leadData = {
             data: [
                 {
-                    First_Name: 'yuvraj',
-                    Last_Name: 'manchadi',
-                    Email: 'manchadi321@gmail.com',
-                    Phone: '9594111101',
+                    First_Name,
+                    Last_Name,
+                    Email,
+                    Phone,
                     // Date_Time_4: '2024-11-27T11:40:30+06:00',
                     Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+05:30`,
                     Lead_Requirement,

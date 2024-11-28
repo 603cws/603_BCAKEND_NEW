@@ -13,6 +13,8 @@ import { cronHandler } from "./api/cron"; // Import your cron handler
 import careerRoutes from "./src/routes/careerRoutes";
 import daypassroutes from "./src/routes/DayPassRoute";
 
+import couponRoutes from "./src/routes/couponRoutes"
+
 import zohoRoutes from "./src/routes/zohoRoutes";
 
 const axios = require("axios");
@@ -83,6 +85,7 @@ app.use("/api/v1/career", careerRoutes);
 app.use("/api/v1/credits", creditRoutes);
 app.use("/api/v1/daypass", daypassroutes);
 app.use("/api/v1/zoho", zohoRoutes);
+app.use("api/v1/coupon",couponRoutes)
 
 //payment route
 app.use("/api/v1/order", orderRoutes);
