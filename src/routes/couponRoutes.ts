@@ -4,7 +4,7 @@ import { createCoupon, validateCouponCode } from "../controllers/couponControlle
 const router = Router()
 
 router.post("/createcoupon",createCoupon)
-router.get("/getcoupon",validateCouponCode)
+router.post("/validatecoupon",validateCouponCode)
 
 
 export default router

@@ -85,7 +85,7 @@ app.use("/api/v1/career", careerRoutes);
 app.use("/api/v1/credits", creditRoutes);
 app.use("/api/v1/daypass", daypassroutes);
 app.use("/api/v1/zoho", zohoRoutes);
-app.use("api/v1/coupon",couponRoutes)
+app.use("/api/v1/coupon",couponRoutes)
 
 //payment route
 app.use("/api/v1/order", orderRoutes);

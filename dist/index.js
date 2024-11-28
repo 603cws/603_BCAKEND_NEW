@@ -74,7 +74,7 @@ app.use("/api/v1/career", careerRoutes_1.default);
 app.use("/api/v1/credits", creditRoute_1.default);
 app.use("/api/v1/daypass", DayPassRoute_1.default);
 app.use("/api/v1/zoho", zohoRoutes_1.default);
-app.use("api/v1/coupon", couponRoutes_1.default);
+app.use("/api/v1/coupon", couponRoutes_1.default);
 //payment route
 app.use("/api/v1/order", OrderRoutes_1.default);
 app.get("/", (req, res) => {
