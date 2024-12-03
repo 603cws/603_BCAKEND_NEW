@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.zohoFormWebHook = exports.getlayouts = exports.getBookings = exports.createBookingOnZoho = exports.createLeadPopupForm = exports.createLead = void 0;
 const axios_1 = __importDefault(require("axios"));
-const user_model_1 = require("../models/user.model");
 // const access_token = require("./../../index");
 const ZOHO_TOKEN_URL = 'https://accounts.zoho.com/oauth/v2/token';
 let { ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_REDIRECT_URL, ZOHO_AUTHORIZATION_CODE, ZOHO_REFRESH_TOKEN, } = process.env;
@@ -282,18 +281,20 @@ exports.getlayouts = getlayouts;
 const zohoFormWebHook = async (req, res) => {
     try {
         const formData = req.body; // The data sent from Zoho Forms
-        const updatedUser = await user_model_1.UserModel.findOneAndUpdate({ email: formData.Email }, { kyc: true }, { new: true });
-        if (!updatedUser)
-            return res.status(400).json('user not found ');
+        // const updatedUser = await UserModel.findOneAndUpdate(
+        //   { email: formData.Email },
+        //   { kyc: true },
+        //   { new: true }
+        // );
+        // if (!updatedUser) return res.status(400).json('user not found ');
         console.log('Received webhook data:', formData);
         res.status(200).json({
-            updatedUser,
             formData,
         });
     }
     catch (error) {
-        console.error('Error handling webhook:', error);
-        res.status(500).send('Server Error');
+        // console.error('Error handling webhook:', error);
+        res.status(500).json(error);
     }
 };
 exports.zohoFormWebHook = zohoFormWebHook;

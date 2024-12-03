@@ -342,22 +342,21 @@ export const zohoFormWebHook = async (req: Request, res: Response) => {
   try {
     const formData = req.body; // The data sent from Zoho Forms
 
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { email: formData.Email },
-      { kyc: true },
-      { new: true }
-    );
+    // const updatedUser = await UserModel.findOneAndUpdate(
+    //   { email: formData.Email },
+    //   { kyc: true },
+    //   { new: true }
+    // );
 
-    if (!updatedUser) return res.status(400).json('user not found ');
+    // if (!updatedUser) return res.status(400).json('user not found ');
 
     console.log('Received webhook data:', formData);
 
     res.status(200).json({
-      updatedUser,
       formData,
     });
   } catch (error) {
-    console.error('Error handling webhook:', error);
-    res.status(500).send('Server Error');
+    // console.error('Error handling webhook:', error);
+    res.status(500).json(error);
   }
 };
