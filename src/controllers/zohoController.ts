@@ -350,7 +350,7 @@ export const zohoFormWebHook = async (req: Request, res: Response) => {
 
     if (!updatedUser) return res.status(400).json('user not found ');
 
-    console.log('Received webhook data:', formData);
+    // console.log('Received webhook data:', formData);
 
     res.status(200).json({
       formData,

@@ -285,7 +285,7 @@ const zohoFormWebHook = async (req, res) => {
         const updatedUser = await user_model_1.UserModel.findOneAndUpdate({ email: formData.Email }, { kyc: true }, { new: true });
         if (!updatedUser)
             return res.status(400).json('user not found ');
-        console.log('Received webhook data:', formData);
+        // console.log('Received webhook data:', formData);
         res.status(200).json({
             formData,
             updatedUser,
