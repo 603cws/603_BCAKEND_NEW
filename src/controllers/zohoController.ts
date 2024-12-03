@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { Request, Response } from 'express';
+import { string } from 'zod';
+
+import { UserModel } from '../models/user.model';
 
 // const access_token = require("./../../index");
 
@@ -12,6 +15,30 @@ let {
   ZOHO_AUTHORIZATION_CODE,
   ZOHO_REFRESH_TOKEN,
 } = process.env;
+
+const now = new Date();
+const month = now.getMonth() + 1;
+const year = now.getFullYear();
+const date = now.getDate();
+const hours = now.getHours();
+const minutes = now.getMinutes();
+const seconds = now.getSeconds();
+
+// Async function to get current date and time
+const getCurrentDateTime = async () => {
+  // Simulate async operation if needed (e.g., fetching from an API)
+  return new Promise(resolve => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    resolve({ year, month, date, hours, minutes, seconds });
+  });
+};
 
 // let access_token =
 //   "1000.e6bfe755051b80fef105b6815e0307c0.13bd1cdd2c1ae762d59ba693ae5cb542";
@@ -86,80 +113,6 @@ const getAccessToken = async () => {
 
 // LAYOUT ID  3269090000016654005
 
-//fetch all the layout
-
-// const zoho_layout_url =
-//   "https://www.zohoapis.com/crm/v2/settings/layouts?module=Leads";
-
-// export const fetchZohoLeadLayout = async () => {
-//   try {
-//     const fetchlayout = await axios.get(zoho_layout_url, {
-//       headers: {
-//         Authorization: `zoho-oauthtoken ${access_token}`,
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     const resData = fetchlayout.data;
-
-//     console.log(fetchlayout.data);
-
-//     return resData;
-//   } catch (error) {
-//     console.error("something went wrong fetching ");
-//   }
-// };
-
-// // Function to use the access token in an API request to Zoho CRM
-// export const createLead = async (data) => {
-//   try {
-//     // const accessToken = await getAccessToken();
-//     // console.log(accessToken);
-
-//     const { email, name, phone, company, requirements } = data;
-
-//     //split username
-
-//     const [firstname, lastname] = name.split(" ");
-
-//     const zohoCRMUrl = "https://www.zohoapis.com/crm/v2/Leads";
-//     const leadData = {
-//       data: [
-//         {
-//           layout: {
-//             id: "3269090000016654005",
-//           },
-//           First_Name: firstname,
-//           Last_Name: lastname,
-//           Email: email,
-//           Phone: phone,
-//           // Date_Time: new Date(),
-//           Company: company,
-//         },
-//       ],
-//     };
-
-//     const response = await axios.post(zohoCRMUrl, leadData, {
-//       headers: {
-//         Authorization: `Zoho-oauthtoken ${access_token}`,
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     console.log("Lead created successfully:", response.data);
-//   } catch (error) {
-//     console.error("Error creating lead:", error);
-//   }
-// };
-
-const now = new Date();
-const month = now.getMonth() + 1;
-const year = now.getFullYear();
-const date = now.getDate();
-const hours = now.getHours();
-const minutes = now.getMinutes();
-const seconds = now.getSeconds();
-
 // Function to use the access token in an API request to Zoho CRM for contact form
 export const createLead = async (data: any) => {
   try {
@@ -185,6 +138,8 @@ export const createLead = async (data: any) => {
     let Email = email;
     let Phone = phone;
 
+    const currentdateTime: any = await getCurrentDateTime();
+
     //split username
 
     const [First_Name, Last_Name] = name.split(' ');
@@ -201,7 +156,8 @@ export const createLead = async (data: any) => {
           Phone,
           LEAD_LOCATION: location,
           // Date_Time_4: '2024-11-27T11:40:30+06:00',
-          Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+06:00`,
+          // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+06:00`,
+          Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
           // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
           Lead_Requirement,
           Company,
@@ -233,9 +189,10 @@ export const createLeadPopupForm = async (data: any) => {
     const accessToken = await getAccessToken();
     console.log(accessToken);
 
-    const { name,phone, email, company, requirements } = data;
+    const { name, phone, email, company, requirements } = data;
 
     console.log(data);
+    const currentdateTime: any = await getCurrentDateTime();
 
     // let Location = location;
     let Company = company;
@@ -260,7 +217,7 @@ export const createLeadPopupForm = async (data: any) => {
           Email,
           Phone,
           // Date_Time_4: '2024-11-27T11:40:30+06:00',
-          Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+05:30`,
+          Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
           Lead_Requirement,
           Company,
           layout: {
@@ -283,6 +240,81 @@ export const createLeadPopupForm = async (data: any) => {
     console.error('Error creating lead:', error);
   }
 };
+
+//zoho booking
+export const createBookingOnZoho = async (req: Request, res: Response) => {
+  try {
+    const accessToken = await getAccessToken();
+    // console.log(accessToken);
+
+    const { user, booking, daypass } = req.body;
+
+    console.log(req.body);
+
+    const currentdateTime: any = await getCurrentDateTime();
+
+    console.log(currentdateTime);
+
+    const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Bookings';
+    const leadData = {
+      data: [
+        {
+          Name: user.name,
+          Email: user.email,
+          Phone: user.phone,
+          Booking_type: booking.spaceName,
+          start_Time: booking.startTime,
+          End_time: booking.endTime,
+          booking_date: booking.date,
+          bookdate: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}`,
+          location: booking.location,
+          Db_booking_id: booking._id,
+          user_Id: user._id,
+          // Date_Time_4: '2024-11-27T11:40:30+06:00',
+          // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+05:30`,
+        },
+      ],
+    };
+
+    const response = await axios.post(zohoCRMUrl, leadData, {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Booking  created successfully:', response.data);
+    console.log(response.data.data[0].details);
+
+    res.status(200).json({ message: 'success' });
+  } catch (error) {
+    console.error('Error creating lead:', error);
+  }
+};
+
+//get all the bookings
+export const getBookings = async (req: Request, res: Response) => {
+  const url = 'https://www.zohoapis.com/crm/v2/Bookings'; // Replace 'Bookings' with your module's API name
+
+  const accessToken = await getAccessToken();
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    // const data = await response.json();
+
+    res.status(200).json(response.data);
+    // console.log(response.data);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+  }
+};
+
+// getBookings();
+
 export const getlayouts = async (req: Request, res: Response) => {
   try {
     const accessToken = await getAccessToken();
@@ -305,3 +337,27 @@ export const getlayouts = async (req: Request, res: Response) => {
 };
 // Example usage
 // createLead();
+
+export const zohoFormWebHook = async (req: Request, res: Response) => {
+  try {
+    const formData = req.body; // The data sent from Zoho Forms
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email: formData.Email },
+      { kyc: true },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(400).json('user not found ');
+
+    console.log('Received webhook data:', formData);
+
+    res.status(200).json({
+      updatedUser,
+      formData,
+    });
+  } catch (error) {
+    console.error('Error handling webhook:', error);
+    res.status(500).send('Server Error');
+  }
+};
