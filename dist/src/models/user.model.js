@@ -35,12 +35,13 @@ const usersSchema = new mongoose_1.Schema({
     zipcode: { type: String },
     password: { type: String, required: true },
     phone: { type: String },
-    role: { type: String, enum: ["admin", "user"], default: "user" },
+    role: { type: String, enum: ['admin', 'user'], default: 'user' },
+    member: { type: Boolean, default: false },
     kyc: { type: Boolean, default: false },
     creditsleft: { type: Number, default: 0 },
     monthlycredits: { type: Number, default: 0 },
     location: { type: String },
     extracredits: { type: Number, default: 0 },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
 });
 exports.UserModel = mongoose_1.default.model('User', usersSchema);
