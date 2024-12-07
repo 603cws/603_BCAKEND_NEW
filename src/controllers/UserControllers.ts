@@ -522,6 +522,7 @@ export const createuser = async (req: Request, res: Response) => {
       city,
       monthlycredits,
       location,
+      member,
     } = body;
 
     const usernameExists = await UserModel.findOne({ username });
@@ -551,6 +552,7 @@ export const createuser = async (req: Request, res: Response) => {
       city,
       creditsleft: monthlycredits,
       monthlycredits,
+      member,
       createdAt: Date.now(),
     });
 

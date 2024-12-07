@@ -501,7 +501,7 @@ const createuser = async (req, res) => {
         return res.status(400).json({ msg: 'Invalid Inputs' });
     }
     try {
-        const { companyName, email, password, phone, username, country, state, zipcode, city, monthlycredits, location, } = body;
+        const { companyName, email, password, phone, username, country, state, zipcode, city, monthlycredits, location, member, } = body;
         const usernameExists = await user_model_1.UserModel.findOne({ username });
         if (usernameExists) {
             return res.status(409).json({ msg: 'Username exists' });
@@ -527,6 +527,7 @@ const createuser = async (req, res) => {
             city,
             creditsleft: monthlycredits,
             monthlycredits,
+            member,
             createdAt: Date.now(),
         });
         const secretKey = process.env.SECRETKEY;
