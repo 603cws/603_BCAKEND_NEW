@@ -19,74 +19,73 @@ const careerRoutes_1 = __importDefault(require("./src/routes/careerRoutes"));
 const DayPassRoute_1 = __importDefault(require("./src/routes/DayPassRoute"));
 const couponRoutes_1 = __importDefault(require("./src/routes/couponRoutes"));
 const zohoRoutes_1 = __importDefault(require("./src/routes/zohoRoutes"));
-const axios = require("axios");
+const axios = require('axios');
 //import order route
 const OrderRoutes_1 = __importDefault(require("./src/routes/OrderRoutes"));
 //morgan
-const morgan = require("morgan");
+const morgan = require('morgan');
 //helmet
-const helmet = require("helmet");
+const helmet = require('helmet');
 //rate limiter
-const rateLimit = require("express-rate-limit");
+const rateLimit = require('express-rate-limit');
 const app = (0, express_1.default)();
 app.use((0, cookie_parser_1.default)());
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.use(helmet());
 //limit request from same api
 const limiter = rateLimit({
     max: 100, //100 req per hour
     windowMs: 15 * 60 * 1000,
-    message: "Too many requests from this IP,please try again in an hour",
+    message: 'Too many requests from this IP,please try again in an hour',
 });
-app.use("/api", limiter);
+app.use('/api', limiter);
 const port = process.env.PORT || 3000;
 // dotenv.config({ path: "backend/.env" });
-dotenv_1.default.config({ path: "./.env" });
-(0, dbconnect_1.default)().catch((err) => console.error("Database connection error:", err));
+dotenv_1.default.config({ path: './.env' });
+(0, dbconnect_1.default)().catch(err => console.error('Database connection error:', err));
 app.use(express_1.default.json());
 let allowedOrigins;
 //new chages made
 allowedOrigins = [
-    "https://www.603thecoworkingspace.com",
-    "https://603-cws-frontend.vercel.app",
-    "https://603coworkingspace-piyush-joshis-projects.vercel.app",
-    "http://localhost:5173",
+    'https://www.603thecoworkingspace.com',
+    'https://603-cws-frontend.vercel.app',
+    'http://localhost:5173',
 ];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        console.log("Request Origin:", origin);
+        console.log('Request Origin:', origin);
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         }
         else {
-            callback(new Error("Not allowed by CORS"));
+            callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
 }));
-app.get("/api/cron", cron_1.cronHandler);
-app.use("/api/v1/services", ServiceRoute_1.default);
-app.use("/api/v1/spaces", SpaceRoute_1.default);
-app.use("/api/v1/bookings", BookingRoutes_1.default);
-app.use("/api/v1/auth", AuthRoutes_1.default);
-app.use("/api/v1/users", UserRoutes_1.default);
-app.use("/api/v1/career", careerRoutes_1.default);
-app.use("/api/v1/credits", creditRoute_1.default);
-app.use("/api/v1/daypass", DayPassRoute_1.default);
-app.use("/api/v1/zoho", zohoRoutes_1.default);
-app.use("/api/v1/coupon", couponRoutes_1.default);
+app.get('/api/cron', cron_1.cronHandler);
+app.use('/api/v1/services', ServiceRoute_1.default);
+app.use('/api/v1/spaces', SpaceRoute_1.default);
+app.use('/api/v1/bookings', BookingRoutes_1.default);
+app.use('/api/v1/auth', AuthRoutes_1.default);
+app.use('/api/v1/users', UserRoutes_1.default);
+app.use('/api/v1/career', careerRoutes_1.default);
+app.use('/api/v1/credits', creditRoute_1.default);
+app.use('/api/v1/daypass', DayPassRoute_1.default);
+app.use('/api/v1/zoho', zohoRoutes_1.default);
+app.use('/api/v1/coupon', couponRoutes_1.default);
 //payment route
-app.use("/api/v1/order", OrderRoutes_1.default);
-app.get("/", (req, res) => {
-    console.log("Root URL accessed");
-    res.send("Welcome to the API");
+app.use('/api/v1/order', OrderRoutes_1.default);
+app.get('/', (req, res) => {
+    console.log('Root URL accessed');
+    res.send('Welcome to the API');
 });
 // Catch-all route for undefined routes
 app.use((req, res) => {
-    console.log("Undefined route accessed:", req.originalUrl);
-    res.status(404).send("Route not found");
+    console.log('Undefined route accessed:', req.originalUrl);
+    res.status(404).send('Route not found');
 });
-const ZOHO_TOKEN_URL = "https://accounts.zoho.com/oauth/v2/token";
+const ZOHO_TOKEN_URL = 'https://accounts.zoho.com/oauth/v2/token';
 let { ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_REDIRECT_URL, ZOHO_AUTHORIZATION_CODE, ZOHO_REFRESH_TOKEN, } = process.env;
 // let access_token =
 //   "1000.e6bfe755051b80fef105b6815e0307c0.13bd1cdd2c1ae762d59ba693ae5cb542";
@@ -95,30 +94,30 @@ const exchangeAuthorizationCode = async () => {
     try {
         const response = await axios.post(ZOHO_TOKEN_URL, null, {
             params: {
-                grant_type: "authorization_code",
+                grant_type: 'authorization_code',
                 client_id: ZOHO_CLIENT_ID,
                 client_secret: ZOHO_CLIENT_SECRET,
                 redirect_uri: ZOHO_REDIRECT_URL,
                 code: ZOHO_AUTHORIZATION_CODE,
-                state: "zzz",
+                state: 'zzz',
             },
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
         });
         console.log(response.data);
         const { access_token, refresh_token, expires_in, api_domain, token_type } = response.data;
-        console.log("Access Token:", access_token);
-        console.log("Refresh Token:", refresh_token);
-        console.log("Expires In:", expires_in, "seconds");
-        console.log("API Domain:", api_domain);
-        console.log("Token Type:", token_type);
+        console.log('Access Token:', access_token);
+        console.log('Refresh Token:', refresh_token);
+        console.log('Expires In:', expires_in, 'seconds');
+        console.log('API Domain:', api_domain);
+        console.log('Token Type:', token_type);
         // ZOHO_REFRESH_TOKEN = response.data.refresh_token;
         // You can now use the access_token and store refresh_token for long-term use.
         return response.data;
     }
     catch (error) {
-        console.error("Error exchanging authorization code:");
+        console.error('Error exchanging authorization code:');
         throw error;
     }
 };

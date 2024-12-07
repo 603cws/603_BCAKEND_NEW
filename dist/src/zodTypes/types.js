@@ -20,4 +20,5 @@ exports.createuserInputs = zod_1.z.object({
     monthlycredits: zod_1.z.number().optional(),
     extracredits: zod_1.z.number().optional(),
     creditsleft: zod_1.z.number().optional(),
+    member: zod_1.z.boolean().optional(),
 });
