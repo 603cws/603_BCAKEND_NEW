@@ -697,10 +697,9 @@ const requestTour = async (req, res) => {
             .replace('{{intrestedIn}}', intrestedIn);
         await (0, emailUtils_1.sendEmailSales)(sales, 'Tour request recieved', 'A Tour request has been recieved.', htmlContent2);
         //send the data to the zoho lead
-        await (0, zohoController_1.requestTourLead)(req.body);
-        res.status(200).json({
-            message: 'success',
-        });
+        const zohoLead = await (0, zohoController_1.requestTourLead)(req.body);
+        console.log(zohoLead);
+        res.status(200).json('success');
     }
     catch (error) {
         console.log(error.message);

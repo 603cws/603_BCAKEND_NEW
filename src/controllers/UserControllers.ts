@@ -778,10 +778,10 @@ export const requestTour = async (req: Request, res: Response) => {
     );
 
     //send the data to the zoho lead
-    await requestTourLead(req.body);
-    res.status(200).json({
-      message: 'success',
-    });
+    const zohoLead = await requestTourLead(req.body);
+    console.log(zohoLead);
+
+    res.status(200).json('success');
   } catch (error: any) {
     console.log(error.message);
     res.status(400).json('something went wrong');
