@@ -771,7 +771,7 @@ export const requestTour = async (req: Request, res: Response) => {
       .replace('{{intrestedIn}}', intrestedIn);
 
     await sendEmailSales(
-      email,
+      sales,
       'Tour request recieved',
       'A Tour request has been recieved.',
       htmlContent2
@@ -779,8 +779,9 @@ export const requestTour = async (req: Request, res: Response) => {
 
     //send the data to the zoho lead
     await requestTourLead(req.body);
-
-    res.status(200).json('sucess');
+    res.status(200).json({
+      message: 'success',
+    });
   } catch (error: any) {
     console.log(error.message);
     res.status(400).json('something went wrong');
