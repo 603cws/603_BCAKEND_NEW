@@ -154,7 +154,7 @@ export const createLead = async (data: any) => {
           Last_Name,
           Email,
           Phone,
-          LEAD_LOCATION: location,
+          webLeadLocation: location,
           // Date_Time_4: '2024-11-27T11:40:30+06:00',
           // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:30+06:00`,
           Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
@@ -257,9 +257,6 @@ export const requestTourLead = async (data: any) => {
 
     const [First_Name, Last_Name] = name.split(' ');
     //date
-
-    // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
-    // console.log(Date_Time_4);
 
     const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
     const leadData = {

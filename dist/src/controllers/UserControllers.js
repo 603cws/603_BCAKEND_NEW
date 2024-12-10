@@ -675,7 +675,7 @@ exports.sendcallback = sendcallback;
 const requestTour = async (req, res) => {
     try {
         //sales email
-        const sales = process.env.EMAIl_SAKES || '';
+        const sales = process.env.EMAIL_SALES || '';
         //requested body
         const { name, email, phone, location, intrestedIn } = req.body;
         //email template for user
@@ -695,15 +695,17 @@ const requestTour = async (req, res) => {
             .replace('{{email}}', email)
             .replace('{{location}}', location)
             .replace('{{intrestedIn}}', intrestedIn);
-        await (0, emailUtils_1.sendEmailSales)(sales, 'Tour request recieved', 'A Tour request has been recieved.', htmlContent2);
+        await (0, emailUtils_1.sendEmailAdmin)(sales, 'Tour request recieved', 'A Tour request has been recieved.', htmlContent2);
         //send the data to the zoho lead
         const zohoLead = await (0, zohoController_1.requestTourLead)(req.body);
-        console.log(zohoLead);
         res.status(200).json('success');
     }
     catch (error) {
         console.log(error.message);
-        res.status(400).json('something went wrong');
+        res.status(400).json({
+            error,
+            message: 'something went wrong',
+        });
     }
 };
 exports.requestTour = requestTour;
