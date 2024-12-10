@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getuserDetailsByAdmin = exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changeforgotpass = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
+exports.getuserDetailsByAdmin = exports.dokyc = exports.allusersbyadmin = exports.deleteuserbyadmin = exports.updateuserbyadmin = exports.updateuser = exports.forgotPassword = exports.changeforgotpass = exports.changepasswordbyuser = exports.deleteuser = exports.userbyid = exports.getusers = exports.contactus = exports.requestTour = exports.sendcallback = exports.checkauth = exports.getuserdetails = exports.getuserdetailsorig = exports.createuser = void 0;
 const user_model_1 = require("../models/user.model");
 const space_model_1 = require("../models/space.model");
 const types_1 = require("../zodTypes/types");
@@ -672,6 +672,40 @@ const sendcallback = async (req, res) => {
     }
 };
 exports.sendcallback = sendcallback;
+const requestTour = async (req, res) => {
+    try {
+        //sales email
+        const sales = process.env.EMAIl_SAKES || '';
+        //requested body
+        const { name, email, phone, location, intrestedIn } = req.body;
+        //email template for user
+        const templatePath = path_1.default.join(__dirname, '../utils/callbackuser.html');
+        let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
+        const a = name;
+        const htmlContent = htmlTemplate.replace('{{name}}', a);
+        await (0, emailUtils_1.sendEmailSales)(email, 'Your Tour request has been sent', 'Your request has been successfully confirmed.', htmlContent);
+        //email template for admin
+        const templatePath2 = path_1.default.join(__dirname, '../utils/requesttouradmin.html');
+        //reading the template
+        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, 'utf8');
+        //replacing the placeholders in email
+        const htmlContent2 = htmlTemplate2
+            .replace('{{name}}', name)
+            .replace('{{phone}}', phone)
+            .replace('{{email}}', email)
+            .replace('{{location}}', location)
+            .replace('{{intrestedIn}}', intrestedIn);
+        await (0, emailUtils_1.sendEmailSales)(email, 'Tour request recieved', 'A Tour request has been recieved.', htmlContent2);
+        //send the data to the zoho lead
+        await (0, zohoController_1.requestTourLead)(req.body);
+        res.status(200).json('sucess');
+    }
+    catch (error) {
+        console.log(error.message);
+        res.status(400).json('something went wrong');
+    }
+};
+exports.requestTour = requestTour;
 const contactus = async (req, res) => {
     try {
         const sales = process.env.EMAIL_SALES || '';

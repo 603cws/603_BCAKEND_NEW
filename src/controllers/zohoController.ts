@@ -132,7 +132,7 @@ export const createLead = async (data: any) => {
     console.log(data);
 
     // let Location = location;
-    let Company = company;
+    let Company = company || ' ';
     let Lead_Requirement = requirements;
 
     let Email = email;
@@ -161,7 +161,7 @@ export const createLead = async (data: any) => {
           // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
           Lead_Requirement,
           Company,
-          specifications,
+          specifications: specifications || '',
           layout: {
             id: '3269090000016654005',
           },
@@ -220,6 +220,59 @@ export const createLeadPopupForm = async (data: any) => {
           Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
           Lead_Requirement,
           Company,
+          layout: {
+            id: '3269090000016654005',
+          },
+        },
+      ],
+    };
+
+    const response = await axios.post(zohoCRMUrl, leadData, {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Lead created successfully:', response.data);
+    console.log(response.data.data[0].details);
+  } catch (error) {
+    console.error('Error creating lead:', error);
+  }
+};
+
+export const requestTourLead = async (data: any) => {
+  try {
+    const accessToken = await getAccessToken();
+    console.log(accessToken);
+
+    const { name, phone, email, location, intrestedIn } = data;
+
+    console.log(data);
+    const currentdateTime: any = await getCurrentDateTime();
+    let Email = email;
+    let Phone = phone;
+
+    //split username
+
+    const [First_Name, Last_Name] = name.split(' ');
+    //date
+
+    // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
+    // console.log(Date_Time_4);
+
+    const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
+    const leadData = {
+      data: [
+        {
+          First_Name,
+          Last_Name: Last_Name || ' ',
+          Email,
+          Phone,
+          // Date_Time_4: '2024-11-27T11:40:30+06:00',
+          Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
+          Lead_Requirement: intrestedIn,
+          webLeadLocation: location,
           layout: {
             id: '3269090000016654005',
           },

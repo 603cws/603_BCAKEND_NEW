@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.zohoFormWebHook = exports.getlayouts = exports.getBookings = exports.createBookingOnZoho = exports.createLeadPopupForm = exports.createLead = void 0;
+exports.zohoFormWebHook = exports.getlayouts = exports.getBookings = exports.createBookingOnZoho = exports.requestTourLead = exports.createLeadPopupForm = exports.createLead = void 0;
 const axios_1 = __importDefault(require("axios"));
 const user_model_1 = require("../models/user.model");
 // const access_token = require("./../../index");
@@ -100,7 +100,7 @@ const createLead = async (data) => {
         const { name, phone, email, location, company, requirements, specifications, } = data;
         console.log(data);
         // let Location = location;
-        let Company = company;
+        let Company = company || ' ';
         let Lead_Requirement = requirements;
         let Email = email;
         let Phone = phone;
@@ -123,7 +123,7 @@ const createLead = async (data) => {
                     // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
                     Lead_Requirement,
                     Company,
-                    specifications,
+                    specifications: specifications || '',
                     layout: {
                         id: '3269090000016654005',
                     },
@@ -194,6 +194,52 @@ const createLeadPopupForm = async (data) => {
     }
 };
 exports.createLeadPopupForm = createLeadPopupForm;
+const requestTourLead = async (data) => {
+    try {
+        const accessToken = await getAccessToken();
+        console.log(accessToken);
+        const { name, phone, email, location, intrestedIn } = data;
+        console.log(data);
+        const currentdateTime = await getCurrentDateTime();
+        let Email = email;
+        let Phone = phone;
+        //split username
+        const [First_Name, Last_Name] = name.split(' ');
+        //date
+        // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
+        // console.log(Date_Time_4);
+        const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Leads';
+        const leadData = {
+            data: [
+                {
+                    First_Name,
+                    Last_Name: Last_Name || ' ',
+                    Email,
+                    Phone,
+                    // Date_Time_4: '2024-11-27T11:40:30+06:00',
+                    Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
+                    Lead_Requirement: intrestedIn,
+                    webLeadLocation: location,
+                    layout: {
+                        id: '3269090000016654005',
+                    },
+                },
+            ],
+        };
+        const response = await axios_1.default.post(zohoCRMUrl, leadData, {
+            headers: {
+                Authorization: `Zoho-oauthtoken ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log('Lead created successfully:', response.data);
+        console.log(response.data.data[0].details);
+    }
+    catch (error) {
+        console.error('Error creating lead:', error);
+    }
+};
+exports.requestTourLead = requestTourLead;
 //zoho booking
 const createBookingOnZoho = async (req, res) => {
     try {

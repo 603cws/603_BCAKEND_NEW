@@ -21,5 +21,7 @@ router.post('/admin/updateuser', adminMiddleware_1.admin, UserControllers_1.upda
 router.post('/admin/deleteuser', adminMiddleware_1.admin, UserControllers_1.deleteuserbyadmin);
 //get a particular user by admin
 router.post('/getUserByAdmin', UserControllers_1.getuserDetailsByAdmin);
+//send email to admin for request a tour
+router.post('/requestTour', UserControllers_1.requestTour);
 //update user details
 exports.default = router;

@@ -10,7 +10,11 @@ import cookie from 'cookie';
 import path from 'path';
 import fs from 'fs';
 
-import { createLead, createLeadPopupForm } from './zohoController';
+import {
+  createLead,
+  createLeadPopupForm,
+  requestTourLead,
+} from './zohoController';
 import { decode } from 'punycode';
 
 const Users = [
@@ -725,6 +729,61 @@ export const sendcallback = async (req: Request, res: Response) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: 'Internal server error3' });
+  }
+};
+
+export const requestTour = async (req: Request, res: Response) => {
+  try {
+    //sales email
+    const sales = process.env.EMAIl_SAKES || '';
+
+    //requested body
+    const { name, email, phone, location, intrestedIn } = req.body;
+
+    //email template for user
+    const templatePath = path.join(__dirname, '../utils/callbackuser.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const a = name;
+    const htmlContent = htmlTemplate.replace('{{name}}', a);
+
+    await sendEmailSales(
+      email,
+      'Your Tour request has been sent',
+      'Your request has been successfully confirmed.',
+      htmlContent
+    );
+
+    //email template for admin
+    const templatePath2 = path.join(
+      __dirname,
+      '../utils/requesttouradmin.html'
+    );
+
+    //reading the template
+    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
+
+    //replacing the placeholders in email
+    const htmlContent2 = htmlTemplate2
+      .replace('{{name}}', name)
+      .replace('{{phone}}', phone)
+      .replace('{{email}}', email)
+      .replace('{{location}}', location)
+      .replace('{{intrestedIn}}', intrestedIn);
+
+    await sendEmailSales(
+      email,
+      'Tour request recieved',
+      'A Tour request has been recieved.',
+      htmlContent2
+    );
+
+    //send the data to the zoho lead
+    await requestTourLead(req.body);
+
+    res.status(200).json('sucess');
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(400).json('something went wrong');
   }
 };
 

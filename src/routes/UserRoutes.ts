@@ -17,6 +17,7 @@ import {
   forgotPassword,
   changeforgotpass,
   getuserDetailsByAdmin,
+  requestTour,
 } from '../controllers/UserControllers';
 import { admin } from '../middlewares/adminMiddleware';
 
@@ -40,6 +41,9 @@ router.post('/admin/deleteuser', admin, deleteuserbyadmin);
 
 //get a particular user by admin
 router.post('/getUserByAdmin', getuserDetailsByAdmin);
+
+//send email to admin for request a tour
+router.post('/requestTour', requestTour);
 
 //update user details
 
