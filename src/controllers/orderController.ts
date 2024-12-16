@@ -35,11 +35,19 @@ const processBookings = async (
   discountPercentage: any
 ) => {
   try {
-    const now = new Date();
+    //date
+    // const now = new Date();
 
     // Extract time components
-    const hours = now.getHours(); // 0-23
-    const minutes = now.getMinutes(); // 0-59
+    const hours = new Date().getHours(); // 0-23
+    const minutes = new Date().getMinutes(); // 0-59
+
+    const currentTimeinHrandMin = `${hours
+      .toString()
+      .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+    console.log('currentTIme', currentTimeinHrandMin);
+
     const userDetails = await UserModel.findById(userID);
     // Use Promise.all to wait for all async operations to complete
 
@@ -69,9 +77,7 @@ const processBookings = async (
           transactionAmount: amountPerBooking.toFixed(2),
           status: paymentDetails.state,
           transactionId: merchantTransactionId,
-          transactionTIme: `${hours.toString().padStart(2, '0')}:${minutes
-            .toString()
-            .padStart(2, '0')}`,
+          transactionTIme: currentTimeinHrandMin,
         });
 
         const storeBooking = await newBooking.save();
@@ -94,10 +100,7 @@ const processBookings = async (
         console.log(storePayment);
 
         //store the booking on the zoho
-        const zohobooking = await createBookingOnZohoOnlinePay(
-          userID,
-          storeBooking
-        );
+        const zohobooking = await createBookingOnZohoOnlinePay(userID, booking);
 
         const userEmail = userDetails?.email || ' ';
 
@@ -264,7 +267,7 @@ const refundUrl = `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/refund`
 // const MERCHANT_ID = 'M224FPWUGXCXH';
 // const MERCHANT_BASE_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay"
 // const MERCHANT_STATUS_URL = "https://api.phonepe.com/apis/hermes/pg/v1/status"`
-// const redirectUrl = 'https://www.603thecoworkingspace.com/api/v1/order/status';
+// const redirectUrl = 'https://603-bcakend-new.vercel.app/api/v1/order/status';
 // const refundUrl = `https://api.phonepe.com/apis/hermes/pg/v1/refund`;
 //const successUrl = 'https://www.603thecoworkingspace.com/dashboard';
 //const failureUrl = 'https://www.603thecoworkingspace.com/payment';
