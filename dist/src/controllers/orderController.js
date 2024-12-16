@@ -91,20 +91,15 @@ const processBookings = async (bookings, userID, paymentMethod, paymentDetails, 
             // Read HTML template from file
             const templatePath = path_1.default.join(__dirname, '../utils/email.html');
             let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
-            // // Replace placeholders with actual values
-            // const htmlContent = htmlTemplate
-            //   .replace('{{name}}', userDetails?.companyName || ' ')
-            //   .replace('{{startTime}}', booking.startTime)
-            //   .replace('{{endTime}}', booking.endTime)
-            //   .replace('{{place}}', loc.name)
-            //   .replace('{{date}}', booking.date);
-            // // Send confirmation email
-            // await sendEmailAdmin(
-            //   userEmail,
-            //   'Booking Confirmation',
-            //   'Your room booking at 603 Coworking Space has been successfully confirmed.',
-            //   htmlContent
-            // );
+            // Replace placeholders with actual values
+            const htmlContent = htmlTemplate
+                .replace('{{name}}', userDetails?.companyName || ' ')
+                .replace('{{startTime}}', booking.startTime)
+                .replace('{{endTime}}', booking.endTime)
+                .replace('{{place}}', loc.name)
+                .replace('{{date}}', booking.date);
+            // Send confirmation email
+            await (0, emailUtils_1.sendEmailAdmin)(userEmail, 'Booking Confirmation', 'Your room booking at 603 Coworking Space has been successfully confirmed.', htmlContent);
             // return storeBooking;
         }));
         // // After all bookings are processed, send a response
@@ -183,12 +178,7 @@ const processDaypasses = async (daypasses, userID, paymentMethod, paymentDetails
                 .replace('{{name}}', a)
                 .replace('{{place}}', daypass.spaceName)
                 .replace('{{date}}', daypass.bookeddate);
-            // await sendEmailAdmin(
-            //   userEmail,
-            //   'Booking Confirmation',
-            //   'Your dayPass booking at 603 Coworking Space has been successfully confirmed.',
-            //   htmlContent
-            // );
+            await (0, emailUtils_1.sendEmailAdmin)(userEmail, 'Booking Confirmation', 'Your dayPass booking at 603 Coworking Space has been successfully confirmed.', htmlContent);
             // return storeDaypass;
         }));
         // After all daypass are processed, send a respons
@@ -199,26 +189,28 @@ const processDaypasses = async (daypasses, userID, paymentMethod, paymentDetails
 };
 //integrate phonepe
 //test credentials
-const MERCHANT_KEY = '96434309-7796-489d-8924-ab56988a6076';
-const MERCHANT_ID = 'PGTESTPAYUAT86';
-const MERCHANT_BASE_URL = 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
-const MERCHANT_STATUS_URL = 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status';
-// const redirectUrl = 'http://127.0.0.1:3000/api/v1/order/status';
-const redirectUrl = 'https://603-bcakend-new.vercel.app/api/v1/order/status';
-// const successUrl = 'http://localhost:5173/dashboard';
-const successUrl = 'https://www.603thecoworkingspace.com/dashboard';
-// const failureUrl = 'http://localhost:5173/payment';
-const failureUrl = 'https://www.603thecoworkingspace.com/payment';
-const refundUrl = `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/refund`;
-//prod credentials
-// const MERCHANT_KEY = '1ffdba94-b557-45f4-8b17-3d7964082aa9';
-// const MERCHANT_ID = 'M224FPWUGXCXH';
-// const MERCHANT_BASE_URL = "https://api.phonepe.com/apis/hermes/pg/v1/pay"
-// const MERCHANT_STATUS_URL = "https://api.phonepe.com/apis/hermes/pg/v1/status"`
+// const MERCHANT_KEY = '96434309-7796-489d-8924-ab56988a6076';
+// const MERCHANT_ID = 'PGTESTPAYUAT86';
+// const MERCHANT_BASE_URL =
+//   'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay';
+// const MERCHANT_STATUS_URL =
+//   'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status';
+// // const redirectUrl = 'http://127.0.0.1:3000/api/v1/order/status';
 // const redirectUrl = 'https://603-bcakend-new.vercel.app/api/v1/order/status';
-// const refundUrl = `https://api.phonepe.com/apis/hermes/pg/v1/refund`;
-//const successUrl = 'https://www.603thecoworkingspace.com/dashboard';
-//const failureUrl = 'https://www.603thecoworkingspace.com/payment';
+// // const successUrl = 'http://localhost:5173/dashboard';
+// const successUrl = 'https://www.603thecoworkingspace.com/dashboard';
+// // const failureUrl = 'http://localhost:5173/payment';
+// const failureUrl = 'https://www.603thecoworkingspace.com/payment';
+// const refundUrl = `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/refund`;
+//prod credentials
+const MERCHANT_KEY = '1ffdba94-b557-45f4-8b17-3d7964082aa9';
+const MERCHANT_ID = 'M224FPWUGXCXH';
+const MERCHANT_BASE_URL = 'https://api.phonepe.com/apis/hermes/pg/v1/pay';
+const MERCHANT_STATUS_URL = 'https://api.phonepe.com/apis/hermes/pg/v1/status';
+const redirectUrl = 'https://603-bcakend-new.vercel.app/api/v1/order/status';
+const refundUrl = `https://api.phonepe.com/apis/hermes/pg/v1/refund`;
+const successUrl = 'https://www.603thecoworkingspace.com/dashboard';
+const failureUrl = 'https://www.603thecoworkingspace.com/payment';
 // app.post('/create-order', async (req, res) => {
 const create = async (req, res) => {
     const { accHolder, amount, bookings, dayPasses, discountPercentage } = req.body;
