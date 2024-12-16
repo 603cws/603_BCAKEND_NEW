@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Types } from "mongoose";
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 // Booking Schema
 interface DayPassInterface extends Document {
@@ -11,13 +11,22 @@ interface DayPassInterface extends Document {
   month: number;
   year: number;
   phone: number;
-  status: "pending" | "confirmed" | "cancelled";
-  paymentMethod: "pending" | "credit_card" | "paypal";
+  status:
+    | 'pending'
+    | 'COMPLETED'
+    | 'FAILED'
+    | 'REFUND'
+    | 'confirmed'
+    | 'cancelled';
+  paymentMethod: 'UPI' | 'CARD' | 'NETBANKING' | 'pending' | 'credits';
+  transactionId: string;
+  transactionTIme: string;
+  transactionAmount: number;
   createdAt?: Date;
 }
 
 const DayPassSchema: Schema<DayPassInterface> = new Schema({
-  space: { type: Schema.Types.ObjectId, ref: "Space", required: true },
+  space: { type: Schema.Types.ObjectId, ref: 'Space', required: true },
   companyName: { type: String, required: true },
   email: { type: String, required: true },
   spaceName: { type: String, required: true },
@@ -26,28 +35,40 @@ const DayPassSchema: Schema<DayPassInterface> = new Schema({
   day: { type: Number, required: true },
   month: { type: Number, required: true },
   year: { type: Number, required: true },
+  transactionId: { type: String },
+  transactionTIme: { type: String },
+  transactionAmount: { type: Number },
   status: {
     type: String,
+    // enum: [
+    //   'pending',
+    //   'confirmed',
+    //   'cancelled',
+    //   'authorized',
+    //   'captured',
+    //   'success',
+    //   'failed',
+    // ],
     enum: [
-      "pending",
-      "confirmed",
-      "cancelled",
-      "authorized",
-      "captured",
-      "success",
-      "failed",
+      'COMPLETED',
+      'FAILED',
+      'REFUND',
+      'pending',
+      'confirmed',
+      'cancelled',
     ],
-    default: "pending",
+    default: 'pending',
   },
   paymentMethod: {
     type: String,
-    enum: ["card", "paypal", "bank_transfer", "upi", "netbanking", "pending"],
-    default: "pending",
+    // enum: ["card", "paypal", "bank_transfer", "upi", "netbanking", "pending"],
+    enum: ['credits', 'UPI', 'CARD', 'NETBANKING', 'pending'],
+    default: 'pending',
   },
   createdAt: { type: Date, default: Date.now },
 });
 
 export const DayPass = mongoose.model<DayPassInterface>(
-  "DayPass",
+  'DayPass',
   DayPassSchema
 );

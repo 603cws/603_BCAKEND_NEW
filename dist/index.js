@@ -54,7 +54,7 @@ allowedOrigins = [
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
         console.log('Request Origin:', origin);
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin) || origin === null) {
             callback(null, true);
         }
         else {
@@ -63,6 +63,8 @@ app.use((0, cors_1.default)({
     },
     credentials: true,
 }));
+app.use('api/v1/order/status', (0, cors_1.default)());
+// app.use(cors()); // Allow all origins temporarily
 app.get('/api/cron', cron_1.cronHandler);
 app.use('/api/v1/services', ServiceRoute_1.default);
 app.use('/api/v1/spaces', SpaceRoute_1.default);

@@ -26,30 +26,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const paymentSchema = new mongoose_1.Schema({
-    user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    booking: { type: mongoose_1.Schema.Types.ObjectId, ref: "Booking" },
-    daypasses: { type: mongoose_1.Schema.Types.ObjectId, ref: "Daypasses" },
+    user: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
+    booking: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Booking' },
+    daypasses: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Daypasses' },
     amount: { type: Number, required: true },
     userName: { type: String },
     email: { type: String },
     paymentMethod: {
         type: String,
-        enum: ["card", "paypal", "bank_transfer", "upi", "netbanking"],
+        // enum: ['card', 'paypal', 'bank_transfer', 'upi', 'netbanking'],
+        enum: ['credits', 'UPI', 'CARD', 'NETBANKING', 'pending'],
         required: true,
     },
     status: {
         type: String,
-        enum: [
-            "pending",
-            "completed",
-            "failed",
-            "authorized",
-            "success",
-            "captured",
-        ],
-        default: "pending",
+        // enum: [
+        //   'pending',
+        //   'completed',
+        //   'failed',
+        //   'authorized',
+        //   'success',
+        //   'captured',
+        // ],
+        enum: ['COMPLETED', 'FAILED', 'REFUND', 'pending'],
+        default: 'pending',
     },
-    paymentId: { type: String, required: true },
+    paymentId: { type: String },
     createdAt: { type: Date, default: Date.now },
 });
-exports.PaymentModel = mongoose_1.default.model("Payment", paymentSchema);
+exports.PaymentModel = mongoose_1.default.model('Payment', paymentSchema);

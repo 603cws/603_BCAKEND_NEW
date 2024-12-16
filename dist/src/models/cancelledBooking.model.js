@@ -23,9 +23,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BookingModel = void 0;
+exports.CancelledBookingModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const bookingSchema = new mongoose_1.Schema({
+const cancelledbookingSchema = new mongoose_1.Schema({
     user: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     space: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Space', required: true },
     companyName: { type: String, required: true },
@@ -66,4 +66,4 @@ const bookingSchema = new mongoose_1.Schema({
     },
     createdAt: { type: Date, default: Date.now },
 });
-exports.BookingModel = mongoose_1.default.model('Booking', bookingSchema);
+exports.CancelledBookingModel = mongoose_1.default.model('CancelledBooking', cancelledbookingSchema);

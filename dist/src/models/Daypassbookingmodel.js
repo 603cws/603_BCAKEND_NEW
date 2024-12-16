@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DayPass = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const DayPassSchema = new mongoose_1.Schema({
-    space: { type: mongoose_1.Schema.Types.ObjectId, ref: "Space", required: true },
+    space: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Space', required: true },
     companyName: { type: String, required: true },
     email: { type: String, required: true },
     spaceName: { type: String, required: true },
@@ -35,24 +35,36 @@ const DayPassSchema = new mongoose_1.Schema({
     day: { type: Number, required: true },
     month: { type: Number, required: true },
     year: { type: Number, required: true },
+    transactionId: { type: String },
+    transactionTIme: { type: String },
+    transactionAmount: { type: Number },
     status: {
         type: String,
+        // enum: [
+        //   'pending',
+        //   'confirmed',
+        //   'cancelled',
+        //   'authorized',
+        //   'captured',
+        //   'success',
+        //   'failed',
+        // ],
         enum: [
-            "pending",
-            "confirmed",
-            "cancelled",
-            "authorized",
-            "captured",
-            "success",
-            "failed",
+            'COMPLETED',
+            'FAILED',
+            'REFUND',
+            'pending',
+            'confirmed',
+            'cancelled',
         ],
-        default: "pending",
+        default: 'pending',
     },
     paymentMethod: {
         type: String,
-        enum: ["card", "paypal", "bank_transfer", "upi", "netbanking", "pending"],
-        default: "pending",
+        // enum: ["card", "paypal", "bank_transfer", "upi", "netbanking", "pending"],
+        enum: ['credits', 'UPI', 'CARD', 'NETBANKING', 'pending'],
+        default: 'pending',
     },
     createdAt: { type: Date, default: Date.now },
 });
-exports.DayPass = mongoose_1.default.model("DayPass", DayPassSchema);
+exports.DayPass = mongoose_1.default.model('DayPass', DayPassSchema);

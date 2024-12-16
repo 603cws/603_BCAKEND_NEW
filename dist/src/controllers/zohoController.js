@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.zohoFormWebHook = exports.getlayouts = exports.getBookings = exports.createBookingOnZoho = exports.requestTourLead = exports.createLeadPopupForm = exports.createLead = void 0;
+exports.zohoFormWebHook = exports.getlayouts = exports.getBookings = exports.createBookingOnZohoOnlinePay = exports.createBookingOnZoho = exports.requestTourLead = exports.createLeadPopupForm = exports.createLead = void 0;
 const axios_1 = __importDefault(require("axios"));
 const user_model_1 = require("../models/user.model");
 // const access_token = require("./../../index");
@@ -282,6 +282,47 @@ const createBookingOnZoho = async (req, res) => {
     }
 };
 exports.createBookingOnZoho = createBookingOnZoho;
+//store the booking in the zoho
+const createBookingOnZohoOnlinePay = async (userId, booking) => {
+    try {
+        const accessToken = await getAccessToken();
+        // console.log(accessToken);
+        //get user from db
+        const user = await user_model_1.UserModel.findById(userId);
+        // const { user, booking, daypass }
+        const currentdateTime = await getCurrentDateTime();
+        const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Bookings';
+        const leadData = {
+            data: [
+                {
+                    Name: user?.username,
+                    Email: user?.email,
+                    Phone: user?.phone,
+                    Booking_type: booking.spaceName,
+                    start_Time: booking.startTime,
+                    End_time: booking.endTime,
+                    booking_date: booking.date,
+                    bookdate: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}`,
+                    location: booking.location,
+                    Db_booking_id: booking?._id,
+                    user_Id: user?._id,
+                },
+            ],
+        };
+        const response = await axios_1.default.post(zohoCRMUrl, leadData, {
+            headers: {
+                Authorization: `Zoho-oauthtoken ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log('Booking  created successfully:', response.data);
+        console.log(response.data.data[0].details);
+    }
+    catch (error) {
+        console.error('Error creating lead:', error);
+    }
+};
+exports.createBookingOnZohoOnlinePay = createBookingOnZohoOnlinePay;
 //get all the bookings
 const getBookings = async (req, res) => {
     const url = 'https://www.zohoapis.com/crm/v2/Bookings'; // Replace 'Bookings' with your module's API name

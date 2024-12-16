@@ -341,6 +341,52 @@ export const createBookingOnZoho = async (req: Request, res: Response) => {
     console.error('Error creating lead:', error);
   }
 };
+//store the booking in the zoho
+export const createBookingOnZohoOnlinePay = async (
+  userId: any,
+  booking: any
+) => {
+  try {
+    const accessToken = await getAccessToken();
+    // console.log(accessToken);
+    //get user from db
+    const user = await UserModel.findById(userId);
+    // const { user, booking, daypass }
+
+    const currentdateTime: any = await getCurrentDateTime();
+
+    const zohoCRMUrl = 'https://www.zohoapis.com/crm/v2/Bookings';
+    const leadData = {
+      data: [
+        {
+          Name: user?.username,
+          Email: user?.email,
+          Phone: user?.phone,
+          Booking_type: booking.spaceName,
+          start_Time: booking.startTime,
+          End_time: booking.endTime,
+          booking_date: booking.date,
+          bookdate: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}`,
+          location: booking.location,
+          Db_booking_id: booking?._id,
+          user_Id: user?._id,
+        },
+      ],
+    };
+
+    const response = await axios.post(zohoCRMUrl, leadData, {
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Booking  created successfully:', response.data);
+    console.log(response.data.data[0].details);
+  } catch (error) {
+    console.error('Error creating lead:', error);
+  }
+};
 
 //get all the bookings
 export const getBookings = async (req: Request, res: Response) => {

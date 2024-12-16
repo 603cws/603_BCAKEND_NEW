@@ -1,22 +1,23 @@
-import { Request, Response } from "express";
-import { BookingModel } from "../models/booking.model";
-import { sendEmailAdmin } from "../utils/emailUtils";
-import { UserModel } from "../models/user.model";
-import fs from "fs";
-import path from "path";
-import { SpaceModel } from "../models/space.model";
-import jwt from "jsonwebtoken";
-import cookie from "cookie";
+import { Request, Response } from 'express';
+import { BookingModel } from '../models/booking.model';
+import { sendEmailAdmin } from '../utils/emailUtils';
+import { UserModel } from '../models/user.model';
+import fs from 'fs';
+import path from 'path';
+import { SpaceModel } from '../models/space.model';
+import jwt from 'jsonwebtoken';
+import cookie from 'cookie';
+import { CancelledBookingModel } from '../models/cancelledBooking.model';
 
 //convert time to 24hr basis
 function timeTo24Hours(timeStr: string): string {
-  const [time, modifier] = timeStr.split(" ");
-  let [hours, minutes] = time.split(":");
+  const [time, modifier] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':');
 
-  if (modifier === "pm" && hours !== "12") {
+  if (modifier === 'pm' && hours !== '12') {
     hours = (parseInt(hours, 10) + 12).toString();
-  } else if (modifier === "am" && hours === "12") {
-    hours = "00";
+  } else if (modifier === 'am' && hours === '12') {
+    hours = '00';
   }
 
   return `${hours}:${minutes}`;
@@ -65,7 +66,7 @@ export const checkBookingAvailable = async (req: Request, res: Response) => {
   if (isoverlap) {
     return res
       .status(404)
-      .json({ message: "booking aleady exist on this time range" });
+      .json({ message: 'booking aleady exist on this time range' });
   }
 };
 
@@ -88,24 +89,24 @@ export const createBooking = async (req: Request, res: Response) => {
 
   try {
     if (!email) {
-      return res.status(400).json({ message: "Email ID is required" });
+      return res.status(400).json({ message: 'Email ID is required' });
     }
     const userdet = await UserModel.findOne({ email: email });
     if (!userdet) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     //check if already booking exist
     if (isoverlap) {
       return res
         .status(404)
-        .json({ message: "booking aleady exist on this time range" });
+        .json({ message: 'booking aleady exist on this time range' });
     }
 
     // Find the location
     const loc = await SpaceModel.findOne({ name: location });
     if (!loc) {
-      return res.status(404).json({ message: "Location not found" });
+      return res.status(404).json({ message: 'Location not found' });
     }
     if (userdet.creditsleft >= credits) {
       userdet.creditsleft -= credits;
@@ -124,45 +125,45 @@ export const createBooking = async (req: Request, res: Response) => {
       endTime,
       date,
       creditsspent: credits,
-      paymentMethod: "credits",
-      status: "confirmed",
+      paymentMethod: 'credits',
+      status: 'confirmed',
     });
 
     await userdet.save();
     await newBooking.save();
 
     if (!userdet || !userdet.email) {
-      throw new Error("User email is not defined");
+      throw new Error('User email is not defined');
     }
 
     const userEmail = userdet.email;
 
     // Read HTML template from file
-    const templatePath = path.join(__dirname, "../utils/email.html");
-    let htmlTemplate = fs.readFileSync(templatePath, "utf8");
+    const templatePath = path.join(__dirname, '../utils/email.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     // Replace placeholders with actual values
     const a = userdet.companyName;
     const htmlContent = htmlTemplate
-      .replace("{{name}}", a)
-      .replace("{{startTime}}", startTime)
-      .replace("{{endTime}}", endTime)
-      .replace("{{place}}", location)
-      .replace("{{date}}", date);
+      .replace('{{name}}', a)
+      .replace('{{startTime}}', startTime)
+      .replace('{{endTime}}', endTime)
+      .replace('{{place}}', location)
+      .replace('{{date}}', date);
 
     // Send confirmation email
 
     await sendEmailAdmin(
       userEmail,
-      "Booking Confirmation",
-      "Your room booking at 603 Coworking Space has been successfully confirmed.",
+      'Booking Confirmation',
+      'Your room booking at 603 Coworking Space has been successfully confirmed.',
       htmlContent
     );
 
     res.status(201).json(newBooking);
   } catch (error) {
-    console.error("Error creating booking:", error);
-    res.status(500).json({ message: "Error creating booking", error });
+    console.error('Error creating booking:', error);
+    res.status(500).json({ message: 'Error creating booking', error });
   }
 };
 
@@ -172,17 +173,17 @@ export const getlocationbookings = async (req: Request, res: Response) => {
     const { selectedDate, selectedLocation } = req.body;
 
     if (!selectedLocation) {
-      return res.status(400).json({ message: "selectedLocation is required" });
+      return res.status(400).json({ message: 'selectedLocation is required' });
     }
 
     if (!selectedDate) {
-      return res.status(400).json({ message: "selectedDate is required" });
+      return res.status(400).json({ message: 'selectedDate is required' });
     }
 
     const location = await SpaceModel.findOne({ name: selectedLocation });
 
     if (!location) {
-      return res.status(404).json({ message: "Location not found" });
+      return res.status(404).json({ message: 'Location not found' });
     }
 
     const bookings = await BookingModel.find({
@@ -190,16 +191,13 @@ export const getlocationbookings = async (req: Request, res: Response) => {
       space: location._id,
     });
     if (bookings.length != 0) {
-      let arr: [string, string][] = bookings.map((a) => [
-        a.startTime,
-        a.endTime,
-      ]);
+      let arr: [string, string][] = bookings.map(a => [a.startTime, a.endTime]);
 
       const convertToTime = (time: string): Date => {
-        const [hourMinute, period] = time.split(" ");
-        let [hour, minute] = hourMinute.split(":").map(Number);
-        if (period.toLowerCase() === "pm" && hour !== 12) hour += 12;
-        if (period.toLowerCase() === "am" && hour === 12) hour = 0;
+        const [hourMinute, period] = time.split(' ');
+        let [hour, minute] = hourMinute.split(':').map(Number);
+        if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12;
+        if (period.toLowerCase() === 'am' && hour === 12) hour = 0;
         return new Date(0, 0, 0, hour, minute);
       };
 
@@ -229,8 +227,8 @@ export const getlocationbookings = async (req: Request, res: Response) => {
       res.status(200).json([]);
     }
   } catch (error) {
-    console.error("Error fetching bookings:", error);
-    res.status(500).json({ message: "Error fetching bookings", error });
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ message: 'Error fetching bookings', error });
   }
 };
 
@@ -239,11 +237,11 @@ export const getAllBookingsbyuser = async (req: Request, res: Response) => {
   try {
     const secretKey = process.env.SECRETKEY;
     if (!secretKey) {
-      console.error("JWT secret key is not defined");
-      return res.status(500).json({ msg: "JWT secret key is not defined" });
+      console.error('JWT secret key is not defined');
+      return res.status(500).json({ msg: 'JWT secret key is not defined' });
     }
-    const cookies = cookie.parse(req.headers.cookie || "");
-    console.log("jsdodckj   ", req.headers);
+    const cookies = cookie.parse(req.headers.cookie || '');
+    console.log('jsdodckj   ', req.headers);
     const token = cookies.token;
     console.log(token);
     const decoded: any = jwt.verify(token, secretKey);
@@ -251,7 +249,30 @@ export const getAllBookingsbyuser = async (req: Request, res: Response) => {
     const bookings = await BookingModel.find({ user: decoded.id });
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching bookings", error });
+    res.status(500).json({ message: 'Error fetching bookings', error });
+  }
+};
+//get all cancelled bookings by user
+export const getAllCancelledBookingsbyuser = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const secretKey = process.env.SECRETKEY;
+    if (!secretKey) {
+      console.error('JWT secret key is not defined');
+      return res.status(500).json({ msg: 'JWT secret key is not defined' });
+    }
+    const cookies = cookie.parse(req.headers.cookie || '');
+    console.log('jsdodckj   ', req.headers);
+    const token = cookies.token;
+    console.log(token);
+    const decoded: any = jwt.verify(token, secretKey);
+
+    const bookings = await CancelledBookingModel.find({ user: decoded.id });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings', error });
   }
 };
 
@@ -259,14 +280,14 @@ export const getBookingById = async (req: Request, res: Response) => {
   const bookingId = req.params.id;
   try {
     const booking = await BookingModel.findById(bookingId).populate(
-      "user space"
+      'user space'
     );
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: 'Booking not found' });
     }
     res.status(200).json(booking);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching booking", error });
+    res.status(500).json({ message: 'Error fetching booking', error });
   }
 };
 
@@ -275,16 +296,16 @@ export const getBookingsByUserId = async (req: Request, res: Response) => {
   const userId = req.params.id;
   try {
     const bookings = await BookingModel.find({ user: userId }).populate(
-      "space"
+      'space'
     );
     if (!bookings) {
-      return res.status(404).json({ message: "Bookings not found" });
+      return res.status(404).json({ message: 'Bookings not found' });
     }
     res.status(200).json(bookings);
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error fetching bookings by user ID", error });
+      .json({ message: 'Error fetching bookings by user ID', error });
   }
 };
 
@@ -300,27 +321,26 @@ export const updateBookingStatus = async (req: Request, res: Response) => {
     );
 
     if (!updatedBooking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: 'Booking not found' });
     }
 
     res.status(200).json(updatedBooking);
   } catch (error) {
-    res.status(500).json({ message: "Error updating booking status", error });
+    res.status(500).json({ message: 'Error updating booking status', error });
   }
 };
 
 // Delete a booking
-
 export const deleteBookingbyadmin = async (req: Request, res: Response) => {
   const { id } = req.body; // Extract ID from req.body
   try {
     const deletedBooking = await BookingModel.findByIdAndDelete(id);
     if (!deletedBooking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: 'Booking not found' });
     }
-    res.status(200).json({ message: "Booking deleted successfully" });
+    res.status(200).json({ message: 'Booking deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting booking", error });
+    res.status(500).json({ message: 'Error deleting booking', error });
   }
 };
 
@@ -329,12 +349,12 @@ export const deleteBookingbyuser = async (req: Request, res: Response) => {
   try {
     const deletedBooking = await BookingModel.findByIdAndDelete(bookingid);
     if (!deletedBooking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: 'Booking not found' });
     }
     if (isCancellable) {
       const user = await UserModel.findById(deletedBooking.user);
       if (!user) {
-        return res.status(404).json({ message: "user not found" });
+        return res.status(404).json({ message: 'user not found' });
       }
       if (isRefundable) {
         let a = user?.creditsleft;
@@ -347,11 +367,11 @@ export const deleteBookingbyuser = async (req: Request, res: Response) => {
       }
       await user.save();
     }
-    res.status(200).json({ message: "Booking cancelled successfully!" });
+    res.status(200).json({ message: 'Booking cancelled successfully!' });
 
     //send a cancel booking email
   } catch (error) {
-    res.status(500).json({ message: "Error deleting booking", error });
+    res.status(500).json({ message: 'Error deleting booking', error });
   }
 };
 
@@ -364,12 +384,12 @@ export const allbookingbyadmin = async (req: Request, res: Response) => {
     const allusers = await UserModel.find({}, { _id: 1, extracredits: 1 });
 
     return res.status(200).json({
-      msg: "bookingdetails",
+      msg: 'bookingdetails',
       allbookings,
       allusers,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: "Internal server error" });
+    res.status(500).json({ msg: 'Internal server error' });
   }
 };

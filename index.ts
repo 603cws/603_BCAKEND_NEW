@@ -64,7 +64,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       console.log('Request Origin:', origin);
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || origin === null) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
@@ -73,6 +73,9 @@ app.use(
     credentials: true,
   })
 );
+
+app.use('api/v1/order/status', cors());
+// app.use(cors()); // Allow all origins temporarily
 
 app.get('/api/cron', cronHandler);
 app.use('/api/v1/services', ServiceRoutes);

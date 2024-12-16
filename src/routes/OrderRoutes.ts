@@ -1,21 +1,28 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
+  create,
   createBookingPaymentDatabase,
   createdaypassesPaymentDatabase,
-  createOrder,
-  // storePaymentTestingApi,
-  validateOrder,
-} from "../controllers/orderController";
-import { isBookingOverlap } from "../middlewares/isBookedMiddleware";
+  validate,
+  phonepeCallback,
+  refundcallback,
+  refund,
+} from '../controllers/orderController';
+import { isBookingOverlap } from '../middlewares/isBookedMiddleware';
+import { corsEcape } from '../middlewares/authMiddleware';
 //
 const router = Router();
 
-router.post("/createorder", createOrder);
-router.post("/validateOrder", validateOrder);
-router.post("/storebooking", createBookingPaymentDatabase);
-router.post("/storeDaypasses", createdaypassesPaymentDatabase);
+router.post('/createorder', create);
+router.get('/status', validate);
+router.post('/callback-url', phonepeCallback);
+router.post('/cancelOnlineBooking', refund);
+router.post('/refundcallback', refundcallback);
+// router.get('/validateOrder/:merchantTransactionId', validateOrder);
 
-router.post("/checkOverlap", isBookingOverlap);
+router.post('/storebooking', createBookingPaymentDatabase);
+router.post('/storeDaypasses', createdaypassesPaymentDatabase);
+router.post('/checkOverlap', isBookingOverlap);
 
 //testing route
 // router.post("/testPaymentatore", storePaymentTestingApi);

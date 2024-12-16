@@ -1,9 +1,7 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
-import { Cards } from 'razorpay/dist/types/cards';
-import { string } from 'zod';
 
 // Booking Schema
-interface BookingInterface extends Document {
+interface cancelledBookingInterface extends Document {
   user: Types.ObjectId;
   space: Types.ObjectId;
   companyName: string;
@@ -44,7 +42,7 @@ interface BookingInterface extends Document {
   createdAt?: Date;
 }
 
-const bookingSchema: Schema<BookingInterface> = new Schema({
+const cancelledbookingSchema: Schema<cancelledBookingInterface> = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   space: { type: Schema.Types.ObjectId, ref: 'Space', required: true },
   companyName: { type: String, required: true },
@@ -86,7 +84,7 @@ const bookingSchema: Schema<BookingInterface> = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export const BookingModel = mongoose.model<BookingInterface>(
-  'Booking',
-  bookingSchema
+export const CancelledBookingModel = mongoose.model<cancelledBookingInterface>(
+  'CancelledBooking',
+  cancelledbookingSchema
 );
