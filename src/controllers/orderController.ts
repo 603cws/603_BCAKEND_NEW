@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const crypto = require('crypto');
 const uniqid = require('uniqid');
 import { createBookingOnZohoOnlinePay } from './zohoController';
+import { format, utcToZonedTime } from 'date-fns-tz';
 
 import axios from 'axios';
 // const {
@@ -35,17 +36,26 @@ const processBookings = async (
   discountPercentage: any
 ) => {
   try {
-    //date
-    // const now = new Date();
+    // //date
+    // // const now = new Date();
 
-    // Extract time components
-    const hours = new Date().getHours(); // 0-23
-    const minutes = new Date().getMinutes(); // 0-59
+    // // Extract time components
+    // const hours = new Date().getHours(); // 0-23
+    // const minutes = new Date().getMinutes(); // 0-59
 
-    const currentTimeinHrandMin = `${hours
-      .toString()
-      .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    // const currentTimeinHrandMin = `${hours
+    //   .toString()
+    //   .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
+    // Get the current time in UTC
+    const now = new Date();
+
+    // Convert to IST
+    const timeZone = 'Asia/Kolkata';
+    const zonedTime = utcToZonedTime(now, timeZone);
+
+    // Extract hours and minutes in 24-hour format
+    const currentTimeinHrandMin = format(zonedTime, 'HH:mm', { timeZone });
     console.log('currentTIme', currentTimeinHrandMin);
 
     const userDetails = await UserModel.findById(userID);
