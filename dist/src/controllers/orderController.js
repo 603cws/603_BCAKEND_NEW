@@ -9,8 +9,8 @@ const dotenv = require('dotenv');
 const crypto = require('crypto');
 const uniqid = require('uniqid');
 const zohoController_1 = require("./zohoController");
-const date_fns_tz_1 = require("date-fns-tz");
 const axios_1 = __importDefault(require("axios"));
+const date_fns_tz_1 = require("date-fns-tz");
 // const {
 //   validateWebhookSignature,
 // } = require("razorpay/dist/utils/razorpay-utils");
@@ -30,22 +30,19 @@ dotenv.config();
 //processing booking in db and payment in db
 const processBookings = async (bookings, userID, paymentMethod, paymentDetails, merchantTransactionId, discountPercentage) => {
     try {
-        // //date
-        // // const now = new Date();
+        //date
+        // const now = new Date();
         // // Extract time components
         // const hours = new Date().getHours(); // 0-23
         // const minutes = new Date().getMinutes(); // 0-59
         // const currentTimeinHrandMin = `${hours
         //   .toString()
         //   .padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        // Get the current time in UTC
         const now = new Date();
-        // Convert to IST
         const timeZone = 'Asia/Kolkata';
-        const zonedTime = (0, date_fns_tz_1.utcToZonedTime)(now, timeZone);
-        // Extract hours and minutes in 24-hour format
+        const zonedTime = (0, date_fns_tz_1.toZonedTime)(now, timeZone); // Adjust timezone
         const currentTimeinHrandMin = (0, date_fns_tz_1.format)(zonedTime, 'HH:mm', { timeZone });
-        console.log('currentTIme', currentTimeinHrandMin);
+        console.log('currenttimeinhrsnmin', currentTimeinHrandMin); // Outputs time in 24-hour format
         const userDetails = await user_model_1.UserModel.findById(userID);
         // Use Promise.all to wait for all async operations to complete
         const bookingResults = await Promise.all(bookings.map(async (booking) => {
