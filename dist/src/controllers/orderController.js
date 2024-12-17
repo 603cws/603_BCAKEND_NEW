@@ -316,7 +316,7 @@ const validate = async (req, res) => {
     // }
     axios_1.default.request(option).then(response => {
         console.log(response.data);
-        if (response.data.success === true) {
+        if (response.data.code === 'PAYMENT_SUCCESS') {
             // return res.redirect(successUrl);
             const paymentMethod = response.data.data.paymentInstrument.type;
             const payment = response.data.data;
