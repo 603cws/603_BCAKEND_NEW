@@ -25,8 +25,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DayPass = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+// user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 const DayPassSchema = new mongoose_1.Schema({
     space: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Space', required: true },
+    user: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     companyName: { type: String, required: true },
     email: { type: String, required: true },
     spaceName: { type: String, required: true },
