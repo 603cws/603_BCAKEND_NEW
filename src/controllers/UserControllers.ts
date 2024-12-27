@@ -696,32 +696,32 @@ export const sendcallback = async (req: Request, res: Response) => {
 
     await createLeadPopupForm(data);
 
-    const a = name;
-    const htmlContent = htmlTemplate.replace('{{name}}', a);
+    // const a = name;
+    // const htmlContent = htmlTemplate.replace('{{name}}', a);
 
-    await sendEmailSales(
-      email,
-      'Your CallBack request has been sent',
-      'Your request has been successfully confirmed.',
-      htmlContent
-    );
+    // await sendEmailSales(
+    //   email,
+    //   'Your CallBack request has been sent',
+    //   'Your request has been successfully confirmed.',
+    //   htmlContent
+    // );
 
-    const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
-    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
+    // const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
+    // let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
 
-    const htmlContent2 = htmlTemplate2
-      .replace('{{name}}', a)
-      .replace('{{phone}}', phone)
-      .replace('{{email}}', email)
-      .replace('{{company}}', company)
-      .replace('{{requirements}}', requirements);
+    // const htmlContent2 = htmlTemplate2
+    //   .replace('{{name}}', a)
+    //   .replace('{{phone}}', phone)
+    //   .replace('{{email}}', email)
+    //   .replace('{{company}}', company)
+    //   .replace('{{requirements}}', requirements);
 
-    await sendEmailSales(
-      sales,
-      'CallBack request recieved',
-      'A callback request has been recieved.',
-      htmlContent2
-    );
+    // await sendEmailSales(
+    //   sales,
+    //   'CallBack request recieved',
+    //   'A callback request has been recieved.',
+    //   htmlContent2
+    // );
 
     res
       .status(200)

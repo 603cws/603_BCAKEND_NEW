@@ -650,18 +650,28 @@ const sendcallback = async (req, res) => {
             requirements,
         };
         await (0, zohoController_1.createLeadPopupForm)(data);
-        const a = name;
-        const htmlContent = htmlTemplate.replace('{{name}}', a);
-        await (0, emailUtils_1.sendEmailSales)(email, 'Your CallBack request has been sent', 'Your request has been successfully confirmed.', htmlContent);
-        const templatePath2 = path_1.default.join(__dirname, '../utils/callbackadmin.html');
-        let htmlTemplate2 = fs_1.default.readFileSync(templatePath2, 'utf8');
-        const htmlContent2 = htmlTemplate2
-            .replace('{{name}}', a)
-            .replace('{{phone}}', phone)
-            .replace('{{email}}', email)
-            .replace('{{company}}', company)
-            .replace('{{requirements}}', requirements);
-        await (0, emailUtils_1.sendEmailSales)(sales, 'CallBack request recieved', 'A callback request has been recieved.', htmlContent2);
+        // const a = name;
+        // const htmlContent = htmlTemplate.replace('{{name}}', a);
+        // await sendEmailSales(
+        //   email,
+        //   'Your CallBack request has been sent',
+        //   'Your request has been successfully confirmed.',
+        //   htmlContent
+        // );
+        // const templatePath2 = path.join(__dirname, '../utils/callbackadmin.html');
+        // let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
+        // const htmlContent2 = htmlTemplate2
+        //   .replace('{{name}}', a)
+        //   .replace('{{phone}}', phone)
+        //   .replace('{{email}}', email)
+        //   .replace('{{company}}', company)
+        //   .replace('{{requirements}}', requirements);
+        // await sendEmailSales(
+        //   sales,
+        //   'CallBack request recieved',
+        //   'A callback request has been recieved.',
+        //   htmlContent2
+        // );
         res
             .status(200)
             .json({ msg: 'Request sent to both user and admin successfully!' });

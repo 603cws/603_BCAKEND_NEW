@@ -6,6 +6,9 @@ import { UserModel } from '../models/user.model';
 
 // const access_token = require("./../../index");
 
+//field in zoho crm that diffrenciates that it is a website lead or manually created lead
+// websiteLead
+
 const ZOHO_TOKEN_URL = 'https://accounts.zoho.com/oauth/v2/token';
 
 let {
@@ -160,6 +163,7 @@ export const createLead = async (data: any) => {
           Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
           // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
           Lead_Requirement,
+          websiteLead: `website`,
           Company,
           specifications: specifications || '',
           layout: {
@@ -201,8 +205,7 @@ export const createLeadPopupForm = async (data: any) => {
     let Phone = phone;
 
     //split username
-
-    const [First_Name, Last_Name] = name.split(' ');
+    const [firstname, lastname] = name.split(' ');
     //date
 
     // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
@@ -212,13 +215,14 @@ export const createLeadPopupForm = async (data: any) => {
     const leadData = {
       data: [
         {
-          First_Name,
-          Last_Name,
+          First_Name: firstname || ' ',
+          Last_Name: lastname || ' ',
           Email,
           Phone,
           // Date_Time_4: '2024-11-27T11:40:30+06:00',
           Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
           Lead_Requirement,
+          websiteLead: 'website',
           Company,
           layout: {
             id: '3269090000016654005',
@@ -270,6 +274,7 @@ export const requestTourLead = async (data: any) => {
           Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
           Lead_Requirement: intrestedIn,
           webLeadLocation: location,
+          websiteLead: `website`,
           layout: {
             id: '3269090000016654005',
           },

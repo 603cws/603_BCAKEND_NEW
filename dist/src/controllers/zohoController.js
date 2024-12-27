@@ -7,6 +7,8 @@ exports.zohoFormWebHook = exports.getlayouts = exports.getBookings = exports.cre
 const axios_1 = __importDefault(require("axios"));
 const user_model_1 = require("../models/user.model");
 // const access_token = require("./../../index");
+//field in zoho crm that diffrenciates that it is a website lead or manually created lead
+// websiteLead
 const ZOHO_TOKEN_URL = 'https://accounts.zoho.com/oauth/v2/token';
 let { ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_REDIRECT_URL, ZOHO_AUTHORIZATION_CODE, ZOHO_REFRESH_TOKEN, } = process.env;
 const now = new Date();
@@ -122,6 +124,7 @@ const createLead = async (data) => {
                     Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
                     // Date_Time_4: `${year}-${month}-${date}T${hours}:${minutes}:${seconds}+05:30`,
                     Lead_Requirement,
+                    websiteLead: `website`,
                     Company,
                     specifications: specifications || '',
                     layout: {
@@ -158,7 +161,7 @@ const createLeadPopupForm = async (data) => {
         let Email = email;
         let Phone = phone;
         //split username
-        const [First_Name, Last_Name] = name.split(' ');
+        const [firstname, lastname] = name.split(' ');
         //date
         // let Date_Time_4 = `'${year}-${month}-${date}T${hours}:${minutes}:${seconds}+06:00'`;
         // console.log(Date_Time_4);
@@ -166,13 +169,14 @@ const createLeadPopupForm = async (data) => {
         const leadData = {
             data: [
                 {
-                    First_Name,
-                    Last_Name,
+                    First_Name: firstname || ' ',
+                    Last_Name: lastname || ' ',
                     Email,
                     Phone,
                     // Date_Time_4: '2024-11-27T11:40:30+06:00',
                     Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
                     Lead_Requirement,
+                    websiteLead: 'website',
                     Company,
                     layout: {
                         id: '3269090000016654005',
@@ -218,6 +222,7 @@ const requestTourLead = async (data) => {
                     Date_Time_4: `${currentdateTime.year}-${currentdateTime.month}-${currentdateTime.date}T${currentdateTime.hours}:${currentdateTime.minutes}:30+05:30`,
                     Lead_Requirement: intrestedIn,
                     webLeadLocation: location,
+                    websiteLead: `website`,
                     layout: {
                         id: '3269090000016654005',
                     },
