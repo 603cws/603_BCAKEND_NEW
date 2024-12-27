@@ -25,6 +25,11 @@ import { CancelledBookingModel } from '../models/cancelledBooking.model';
 //configure
 dotenv.config();
 
+// let amountPerBooking =
+//   booking.price +
+//   booking.price * 0.18 -
+//   booking.price * (discountPercentage / 100);
+
 //processing booking in db and payment in db
 const processBookings = async (
   bookings: any,
@@ -64,10 +69,13 @@ const processBookings = async (
           throw new Error('Location not found');
         }
 
-        let amountPerBooking =
-          booking.price +
-          booking.price * 0.18 -
-          booking.price * (discountPercentage / 100);
+        //booking price with discount
+        let prebill =
+          booking.price - booking.price * (discountPercentage / 100);
+
+        let bill = +prebill.toFixed(2);
+        //
+        let amountPerBooking = bill + bill * 0.18;
 
         const newBooking = new BookingModel({
           user: userDetails?._id,
@@ -171,10 +179,19 @@ const processDaypasses = async (
         }
 
         const userDetails = await UserModel.findById(userID);
-        let amountPerdaypas =
-          daypass.price +
-          daypass.price * 0.18 -
-          daypass.price * (discountPercentage / 100);
+        // let amountPerdaypas =
+        //   daypass.price +
+        //   daypass.price * 0.18 -
+        //   daypass.price * (discountPercentage / 100);
+
+        //booking price with discount
+        let prebill =
+          daypass.price - daypass.price * (discountPercentage / 100);
+
+        //fixing the decimal to 2 digit
+        let bill = +prebill.toFixed(2);
+        //calculate gst on the bill
+        let amountPerdaypas = bill + bill * 0.18;
 
         const newDaypass = new DayPass({
           space: loc?._id,
@@ -485,7 +502,6 @@ export const refund = async (req: Request, res: Response) => {
 
   //refund amount in paisa
   const refundAmount = selectedTransaction.transactionAmount * 100;
-
   console.log(refundAmount);
 
   const refundTransactionID = uniqid();

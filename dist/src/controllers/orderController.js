@@ -27,6 +27,10 @@ const cancelledBooking_model_1 = require("../models/cancelledBooking.model");
 // import { checkTimeOverlap } from "../controllers/bookingControllers";
 //configure
 dotenv.config();
+// let amountPerBooking =
+//   booking.price +
+//   booking.price * 0.18 -
+//   booking.price * (discountPercentage / 100);
 //processing booking in db and payment in db
 const processBookings = async (bookings, userID, paymentMethod, paymentDetails, merchantTransactionId, discountPercentage) => {
     try {
@@ -51,9 +55,11 @@ const processBookings = async (bookings, userID, paymentMethod, paymentDetails, 
             if (!loc) {
                 throw new Error('Location not found');
             }
-            let amountPerBooking = booking.price +
-                booking.price * 0.18 -
-                booking.price * (discountPercentage / 100);
+            //booking price with discount
+            let prebill = booking.price - booking.price * (discountPercentage / 100);
+            let bill = +prebill.toFixed(2);
+            //
+            let amountPerBooking = bill + bill * 0.18;
             const newBooking = new booking_model_1.BookingModel({
                 user: userDetails?._id,
                 space: loc._id,
@@ -129,9 +135,16 @@ const processDaypasses = async (daypasses, userID, paymentMethod, paymentDetails
                 throw new Error('Location not found');
             }
             const userDetails = await user_model_1.UserModel.findById(userID);
-            let amountPerdaypas = daypass.price +
-                daypass.price * 0.18 -
-                daypass.price * (discountPercentage / 100);
+            // let amountPerdaypas =
+            //   daypass.price +
+            //   daypass.price * 0.18 -
+            //   daypass.price * (discountPercentage / 100);
+            //booking price with discount
+            let prebill = daypass.price - daypass.price * (discountPercentage / 100);
+            //fixing the decimal to 2 digit
+            let bill = +prebill.toFixed(2);
+            //calculate gst on the bill
+            let amountPerdaypas = bill + bill * 0.18;
             const newDaypass = new Daypassbookingmodel_1.DayPass({
                 space: loc?._id,
                 companyName: userDetails?.companyName,
