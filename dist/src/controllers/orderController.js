@@ -153,6 +153,7 @@ const processDaypasses = async (daypasses, userID, paymentMethod, paymentDetails
                 spaceName: loc?.name,
                 phone: userDetails?.phone,
                 bookeddate: daypass.bookeddate,
+                date: daypass.bookeddate,
                 day: daypass.day,
                 month: daypass.month,
                 year: daypass.year,
@@ -463,31 +464,62 @@ const refund = async (req, res) => {
             };
             const response = await axios.request(option);
             // console.log('check status of refund', response.data);
-            //get and update the booking to the status to refund
-            const getbooking = await booking_model_1.BookingModel.findByIdAndUpdate(bookingid, { status: 'REFUND' }, { new: true, runValidators: true });
-            console.log('bookingthatShouldbecancelled', getbooking);
-            // const storeBookingInCancelledDb = new CancelledBookingModel{
-            // }
-            const getspace = await space_model_1.SpaceModel.findOne({
-                name: getbooking?.spaceName,
-            });
-            const storeBookingInCancelledDb = new cancelledBooking_model_1.CancelledBookingModel({
-                user: accHolder._id,
-                space: getspace?._id,
-                companyName: getbooking?.companyName,
-                spaceName: getbooking?.spaceName,
-                startTime: getbooking?.startTime,
-                endTime: getbooking?.endTime,
-                date: getbooking?.date,
-                creditsspent: getbooking?.creditsspent,
-                paymentMethod: getbooking?.paymentMethod,
-                status: getbooking?.status,
-                transactionAmount: getbooking?.transactionAmount,
-                transactionId: getbooking?.transactionId,
-                transactionTIme: getbooking?.transactionTIme,
-            });
-            await storeBookingInCancelledDb.save();
-            await booking_model_1.BookingModel.findByIdAndDelete(getbooking?._id);
+            //get booking from the booking db
+            const meetOrConfBooking = await booking_model_1.BookingModel.findById(bookingid);
+            //get daypass booking from the daypass db
+            const daypassBooking = await Daypassbookingmodel_1.DayPass.findById(bookingid);
+            //if meetorconfBooking is true
+            if (meetOrConfBooking) {
+                //get and update the booking to the status to refund
+                const getbooking = await booking_model_1.BookingModel.findByIdAndUpdate(bookingid, { status: 'REFUND' }, { new: true, runValidators: true });
+                console.log('bookingthatShouldbecancelled', getbooking);
+                const getspace = await space_model_1.SpaceModel.findOne({
+                    name: getbooking?.spaceName,
+                });
+                const storeBookingInCancelledDb = new cancelledBooking_model_1.CancelledBookingModel({
+                    user: accHolder._id,
+                    space: getspace?._id,
+                    companyName: getbooking?.companyName,
+                    spaceName: getbooking?.spaceName,
+                    startTime: getbooking?.startTime,
+                    endTime: getbooking?.endTime,
+                    date: getbooking?.date,
+                    creditsspent: getbooking?.creditsspent,
+                    paymentMethod: getbooking?.paymentMethod,
+                    status: getbooking?.status,
+                    transactionAmount: getbooking?.transactionAmount,
+                    transactionId: getbooking?.transactionId,
+                    transactionTIme: getbooking?.transactionTIme,
+                });
+                await storeBookingInCancelledDb.save();
+                await booking_model_1.BookingModel.findByIdAndDelete(getbooking?._id);
+            }
+            //if daypassbooking is true
+            if (daypassBooking) {
+                //get and update the booking to the status to refund
+                const getbooking = await Daypassbookingmodel_1.DayPass.findByIdAndUpdate(bookingid, { status: 'REFUND' }, { new: true, runValidators: true });
+                console.log('bookingthatShouldbecancelled', getbooking);
+                const getspace = await space_model_1.SpaceModel.findOne({
+                    name: getbooking?.spaceName,
+                });
+                const storeBookingInCancelledDb = new cancelledBooking_model_1.CancelledBookingModel({
+                    user: accHolder._id,
+                    space: getspace?._id,
+                    companyName: getbooking?.companyName,
+                    spaceName: getbooking?.spaceName,
+                    startTime: getbooking?.startTime,
+                    endTime: getbooking?.endTime,
+                    date: getbooking?.date,
+                    creditsspent: getbooking?.creditsspent,
+                    paymentMethod: getbooking?.paymentMethod,
+                    status: getbooking?.status,
+                    transactionAmount: getbooking?.transactionAmount,
+                    transactionId: getbooking?.transactionId,
+                    transactionTIme: getbooking?.transactionTIme,
+                });
+                await storeBookingInCancelledDb.save();
+                await Daypassbookingmodel_1.DayPass.findByIdAndDelete(getbooking?._id);
+            }
             res.status(200).json(response.data);
         }
     }
@@ -695,6 +727,7 @@ const createdaypassesPaymentDatabase = async (req, res) => {
                     spaceName: loc?.name,
                     phone: userDetails.phone,
                     bookeddate: daypass.bookeddate,
+                    date: daypass.bookeddate,
                     day: daypass.day,
                     month: daypass.month,
                     year: daypass.year,

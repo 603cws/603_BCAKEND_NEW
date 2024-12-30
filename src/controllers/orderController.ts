@@ -201,6 +201,7 @@ const processDaypasses = async (
           spaceName: loc?.name,
           phone: userDetails?.phone,
           bookeddate: daypass.bookeddate,
+          date: daypass.bookeddate,
           day: daypass.day,
           month: daypass.month,
           year: daypass.year,
@@ -585,40 +586,83 @@ export const refund = async (req: Request, res: Response) => {
       const response = await axios.request(option);
       // console.log('check status of refund', response.data);
 
-      //get and update the booking to the status to refund
-      const getbooking = await BookingModel.findByIdAndUpdate(
-        bookingid,
-        { status: 'REFUND' },
-        { new: true, runValidators: true }
-      );
+      //get booking from the booking db
+      const meetOrConfBooking = await BookingModel.findById(bookingid);
 
-      console.log('bookingthatShouldbecancelled', getbooking);
+      //get daypass booking from the daypass db
+      const daypassBooking = await DayPass.findById(bookingid);
 
-      // const storeBookingInCancelledDb = new CancelledBookingModel{
-      // }
+      //if meetorconfBooking is true
+      if (meetOrConfBooking) {
+        //get and update the booking to the status to refund
+        const getbooking = await BookingModel.findByIdAndUpdate(
+          bookingid,
+          { status: 'REFUND' },
+          { new: true, runValidators: true }
+        );
 
-      const getspace = await SpaceModel.findOne({
-        name: getbooking?.spaceName,
-      });
+        console.log('bookingthatShouldbecancelled', getbooking);
 
-      const storeBookingInCancelledDb = new CancelledBookingModel({
-        user: accHolder._id,
-        space: getspace?._id,
-        companyName: getbooking?.companyName,
-        spaceName: getbooking?.spaceName,
-        startTime: getbooking?.startTime,
-        endTime: getbooking?.endTime,
-        date: getbooking?.date,
-        creditsspent: getbooking?.creditsspent,
-        paymentMethod: getbooking?.paymentMethod,
-        status: getbooking?.status,
-        transactionAmount: getbooking?.transactionAmount,
-        transactionId: getbooking?.transactionId,
-        transactionTIme: getbooking?.transactionTIme,
-      });
-      await storeBookingInCancelledDb.save();
+        const getspace = await SpaceModel.findOne({
+          name: getbooking?.spaceName,
+        });
 
-      await BookingModel.findByIdAndDelete(getbooking?._id);
+        const storeBookingInCancelledDb = new CancelledBookingModel({
+          user: accHolder._id,
+          space: getspace?._id,
+          companyName: getbooking?.companyName,
+          spaceName: getbooking?.spaceName,
+          startTime: getbooking?.startTime,
+          endTime: getbooking?.endTime,
+          date: getbooking?.date,
+          creditsspent: getbooking?.creditsspent,
+          paymentMethod: getbooking?.paymentMethod,
+          status: getbooking?.status,
+          transactionAmount: getbooking?.transactionAmount,
+          transactionId: getbooking?.transactionId,
+          transactionTIme: getbooking?.transactionTIme,
+        });
+        await storeBookingInCancelledDb.save();
+
+        await BookingModel.findByIdAndDelete(getbooking?._id);
+      }
+
+      //if daypassbooking is true
+
+      if (daypassBooking) {
+        //get and update the booking to the status to refund
+        const getbooking = await DayPass.findByIdAndUpdate(
+          bookingid,
+          { status: 'REFUND' },
+          { new: true, runValidators: true }
+        );
+
+        console.log('bookingthatShouldbecancelled', getbooking);
+
+        const getspace = await SpaceModel.findOne({
+          name: getbooking?.spaceName,
+        });
+
+        const storeBookingInCancelledDb = new CancelledBookingModel({
+          user: accHolder._id,
+          space: getspace?._id,
+          companyName: getbooking?.companyName,
+          spaceName: getbooking?.spaceName,
+          startTime: getbooking?.startTime,
+          endTime: getbooking?.endTime,
+          date: getbooking?.date,
+          creditsspent: getbooking?.creditsspent,
+          paymentMethod: getbooking?.paymentMethod,
+          status: getbooking?.status,
+          transactionAmount: getbooking?.transactionAmount,
+          transactionId: getbooking?.transactionId,
+          transactionTIme: getbooking?.transactionTIme,
+        });
+        await storeBookingInCancelledDb.save();
+
+        await DayPass.findByIdAndDelete(getbooking?._id);
+      }
+
       res.status(200).json(response.data);
     }
   } catch (error: any) {
@@ -825,7 +869,6 @@ export const createBookingPaymentDatabase = async (
           return storeBooking;
         })
       );
-
       // After all bookings are processed, send a response
       res.status(201).json(bookingResults);
     } catch (error) {
@@ -870,6 +913,7 @@ export const createdaypassesPaymentDatabase = async (
             spaceName: loc?.name,
             phone: userDetails.phone,
             bookeddate: daypass.bookeddate,
+            date: daypass.bookeddate,
             day: daypass.day,
             month: daypass.month,
             year: daypass.year,

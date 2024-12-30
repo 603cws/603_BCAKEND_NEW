@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
+import { string } from 'zod';
 // user: Types.ObjectId;
 // Booking Schema
 interface DayPassInterface extends Document {
@@ -7,6 +8,10 @@ interface DayPassInterface extends Document {
   companyName: string;
   spaceName: string;
   bookeddate: string;
+  startTime: string;
+  endTime: string;
+  creditsspent: number;
+  date: string;
   email: string;
   day: number;
   month: number;
@@ -34,6 +39,10 @@ const DayPassSchema: Schema<DayPassInterface> = new Schema({
   spaceName: { type: String, required: true },
   phone: { type: mongoose.Schema.Types.Mixed },
   bookeddate: { type: String, required: true },
+  startTime: { type: String, default: '09:00 am' },
+  endTime: { type: String, default: '09:00 pm' },
+  creditsspent: { type: Number, default: 0 },
+  date: { type: String },
   day: { type: Number, required: true },
   month: { type: Number, required: true },
   year: { type: Number, required: true },

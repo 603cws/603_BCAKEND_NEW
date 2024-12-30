@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { DayPass } from '../models/Daypassbookingmodel';
 import { Types } from 'mongoose';
 import { SpaceModel } from '../models/space.model';
+import { UserModel } from '../models/user.model';
 
 interface DayPassBookingRequest extends Request {
   body: {
@@ -18,6 +19,9 @@ interface DayPassBookingRequest extends Request {
     paymentMethod: 'pending' | 'credit_card' | 'paypal';
   };
 }
+
+// user:Types.ObjectId
+// date:string;
 
 export const DayPassBooking = async (
   req: DayPassBookingRequest,
@@ -70,6 +74,65 @@ export const DayPassBooking = async (
 
     res.status(201).json({
       message: 'DayPass Booking created successfully',
+      booking: savedBooking,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+//create daypass database
+export const createDaypass = async (req: Request, res: Response) => {
+  try {
+    const {
+      accHolder,
+      spaceName,
+      bookeddate,
+      month,
+      year,
+      status,
+      day,
+      paymentMethod,
+    } = req.body;
+
+    const loc = await SpaceModel.findOne({ name: spaceName });
+    if (!loc) {
+      res.status(404).json({ message: 'Location not found' });
+      return;
+    }
+
+    const user = await UserModel.findOne({ email: accHolder.email });
+    if (!user) {
+      res.status(404).json({ message: 'user not found' });
+      return;
+    }
+
+    const transactionId = 'hduhriyiokeoufc';
+    const transactionTIme = '12:00';
+    const transactionAmount = 999;
+
+    const newBooking = new DayPass({
+      space: loc._id,
+      user: user._id,
+      companyName: user.companyName,
+      spaceName,
+      bookeddate,
+      date: bookeddate,
+      day,
+      month,
+      year,
+      status,
+      paymentMethod,
+      phone: user.phone,
+      email: user.email,
+      transactionAmount,
+      transactionId,
+      transactionTIme,
+    });
+
+    const savedBooking = await newBooking.save();
+
+    res.status(201).json({
       booking: savedBooking,
     });
   } catch (error) {
@@ -146,12 +209,16 @@ export const getDaypassesOfUser = async (req: Request, res: Response) => {
   try {
     const { accHolder } = req.body;
 
+    console.log(accHolder);
+
     const getAllDaypasses = await DayPass.find({ email: accHolder.email });
     if (!getAllDaypasses) {
-      return res.status(404).json('Daypass not found');
+      return res.status(400).json('Daypass not found');
     }
     res.status(200).json(getAllDaypasses);
   } catch (error) {
     res.status(400).json({ message: 'something went wrong' });
   }
 };
+
+//

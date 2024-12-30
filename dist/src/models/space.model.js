@@ -27,11 +27,12 @@ exports.SpaceModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const spaceSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
-    roomtype: { type: String, enum: ["conference", "meeting", "daypass"] },
+    roomtype: { type: String, enum: ['conference', 'meeting', 'daypass'] },
     location: { type: String, required: true },
     description: { type: String },
     amenities: { type: [String] },
     capacity: { type: Number, required: true },
-    createdAt: { type: Date, default: Date.now }
+    price: { type: Number },
+    createdAt: { type: Date, default: Date.now },
 });
 exports.SpaceModel = mongoose_1.default.model('Space', spaceSchema);

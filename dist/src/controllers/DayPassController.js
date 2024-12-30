@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDaypassesOfUser = exports.getdaypassbookings = exports.DayPassBooking = void 0;
+exports.getDaypassesOfUser = exports.getdaypassbookings = exports.createDaypass = exports.DayPassBooking = void 0;
 const Daypassbookingmodel_1 = require("../models/Daypassbookingmodel");
 const space_model_1 = require("../models/space.model");
+const user_model_1 = require("../models/user.model");
+// user:Types.ObjectId
+// date:string;
 const DayPassBooking = async (req, res) => {
     try {
         const { space, companyName, spaceName, bookeddate, month, year, status, day, paymentMethod, phone, email, } = req.body;
@@ -42,6 +45,51 @@ const DayPassBooking = async (req, res) => {
     }
 };
 exports.DayPassBooking = DayPassBooking;
+//create daypass database
+const createDaypass = async (req, res) => {
+    try {
+        const { accHolder, spaceName, bookeddate, month, year, status, day, paymentMethod, } = req.body;
+        const loc = await space_model_1.SpaceModel.findOne({ name: spaceName });
+        if (!loc) {
+            res.status(404).json({ message: 'Location not found' });
+            return;
+        }
+        const user = await user_model_1.UserModel.findOne({ email: accHolder.email });
+        if (!user) {
+            res.status(404).json({ message: 'user not found' });
+            return;
+        }
+        const transactionId = 'hduhriyiokeoufc';
+        const transactionTIme = '12:00';
+        const transactionAmount = 999;
+        const newBooking = new Daypassbookingmodel_1.DayPass({
+            space: loc._id,
+            user: user._id,
+            companyName: user.companyName,
+            spaceName,
+            bookeddate,
+            date: bookeddate,
+            day,
+            month,
+            year,
+            status,
+            paymentMethod,
+            phone: user.phone,
+            email: user.email,
+            transactionAmount,
+            transactionId,
+            transactionTIme,
+        });
+        const savedBooking = await newBooking.save();
+        res.status(201).json({
+            booking: savedBooking,
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+exports.createDaypass = createDaypass;
 const getdaypassbookings = async (req, res) => {
     try {
         const { selectedMonth, selectedYear, selectedLocation } = req.body;
@@ -101,9 +149,10 @@ exports.getdaypassbookings = getdaypassbookings;
 const getDaypassesOfUser = async (req, res) => {
     try {
         const { accHolder } = req.body;
+        console.log(accHolder);
         const getAllDaypasses = await Daypassbookingmodel_1.DayPass.find({ email: accHolder.email });
         if (!getAllDaypasses) {
-            return res.status(404).json('Daypass not found');
+            return res.status(400).json('Daypass not found');
         }
         res.status(200).json(getAllDaypasses);
     }
@@ -112,3 +161,4 @@ const getDaypassesOfUser = async (req, res) => {
     }
 };
 exports.getDaypassesOfUser = getDaypassesOfUser;
+//
