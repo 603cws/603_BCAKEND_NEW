@@ -39,6 +39,7 @@ interface cancelledBookingInterface extends Document {
   transactionId: string;
   transactionTIme: string;
   transactionAmount: number;
+  daypassQuantity: number;
   createdAt?: Date;
 }
 
@@ -54,6 +55,7 @@ const cancelledbookingSchema: Schema<cancelledBookingInterface> = new Schema({
   transactionId: { type: String },
   transactionTIme: { type: String },
   transactionAmount: { type: Number },
+  daypassQuantity: { type: Number, default: 0 },
   status: {
     type: String,
     // enum: [

@@ -211,8 +211,22 @@ const processDaypasses = async (
           transactionTIme: `${hours.toString().padStart(2, '0')}:${minutes
             .toString()
             .padStart(2, '0')}`,
-          transactionAmount: amountPerdaypas,
+          transactionAmount: amountPerdaypas.toFixed(2),
+          quantity: daypass.quantity,
         });
+
+        //update the space available daypass
+        //get the space from the space model
+        // const getspace = await SpaceModel.findOne({
+        //   spaceName: daypass.spaceName,
+        // });
+        // await SpaceModel.findOneAndUpdate({ spaceName: daypass.spaceName },{availableCapacity});
+
+        const updatedSpace = await SpaceModel.findOneAndUpdate(
+          { name: daypass.spaceName }, // Filter
+          { $inc: { availableCapacity: -daypass.quantity } }, // increment
+          { new: true, runValidators: true } // Return the updated document
+        );
 
         const storeDaypass = await newDaypass.save();
         console.log(storeDaypass);
@@ -623,12 +637,10 @@ export const refund = async (req: Request, res: Response) => {
           transactionTIme: getbooking?.transactionTIme,
         });
         await storeBookingInCancelledDb.save();
-
         await BookingModel.findByIdAndDelete(getbooking?._id);
       }
 
       //if daypassbooking is true
-
       if (daypassBooking) {
         //get and update the booking to the status to refund
         const getbooking = await DayPass.findByIdAndUpdate(
@@ -636,7 +648,7 @@ export const refund = async (req: Request, res: Response) => {
           { status: 'REFUND' },
           { new: true, runValidators: true }
         );
-
+        
         console.log('bookingthatShouldbecancelled', getbooking);
 
         const getspace = await SpaceModel.findOne({
@@ -657,7 +669,16 @@ export const refund = async (req: Request, res: Response) => {
           transactionAmount: getbooking?.transactionAmount,
           transactionId: getbooking?.transactionId,
           transactionTIme: getbooking?.transactionTIme,
+          daypassQuantity: getbooking?.quantity,
         });
+
+        //on refund inc the availablespace by quantity
+        const updatedSpace = await SpaceModel.findOneAndUpdate(
+          { name: getbooking?.spaceName }, // Filter
+          { $inc: { availableCapacity: getbooking?.quantity } }, // increment
+          { new: true, runValidators: true } // Return the updated document
+        );
+
         await storeBookingInCancelledDb.save();
 
         await DayPass.findByIdAndDelete(getbooking?._id);

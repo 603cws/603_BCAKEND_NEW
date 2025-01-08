@@ -44,6 +44,7 @@ const DayPassSchema = new mongoose_1.Schema({
     transactionId: { type: String },
     transactionTIme: { type: String },
     transactionAmount: { type: Number },
+    quantity: { type: Number, default: 1 },
     status: {
         type: String,
         // enum: [

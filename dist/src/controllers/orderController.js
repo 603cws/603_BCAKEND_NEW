@@ -163,8 +163,19 @@ const processDaypasses = async (daypasses, userID, paymentMethod, paymentDetails
                 transactionTIme: `${hours.toString().padStart(2, '0')}:${minutes
                     .toString()
                     .padStart(2, '0')}`,
-                transactionAmount: amountPerdaypas,
+                transactionAmount: amountPerdaypas.toFixed(2),
+                quantity: daypass.quantity,
             });
+            //update the space available daypass
+            //get the space from the space model
+            // const getspace = await SpaceModel.findOne({
+            //   spaceName: daypass.spaceName,
+            // });
+            // await SpaceModel.findOneAndUpdate({ spaceName: daypass.spaceName },{availableCapacity});
+            const updatedSpace = await space_model_1.SpaceModel.findOneAndUpdate({ name: daypass.spaceName }, // Filter
+            { $inc: { availableCapacity: -daypass.quantity } }, // increment
+            { new: true, runValidators: true } // Return the updated document
+            );
             const storeDaypass = await newDaypass.save();
             console.log(storeDaypass);
             // Store payment
@@ -516,7 +527,13 @@ const refund = async (req, res) => {
                     transactionAmount: getbooking?.transactionAmount,
                     transactionId: getbooking?.transactionId,
                     transactionTIme: getbooking?.transactionTIme,
+                    daypassQuantity: getbooking?.quantity,
                 });
+                //on refund inc the availablespace by quantity
+                const updatedSpace = await space_model_1.SpaceModel.findOneAndUpdate({ name: getbooking?.spaceName }, // Filter
+                { $inc: { availableCapacity: getbooking?.quantity } }, // increment
+                { new: true, runValidators: true } // Return the updated document
+                );
                 await storeBookingInCancelledDb.save();
                 await Daypassbookingmodel_1.DayPass.findByIdAndDelete(getbooking?._id);
             }

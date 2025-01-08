@@ -3,6 +3,9 @@ import { DayPass } from '../models/Daypassbookingmodel';
 import { Types } from 'mongoose';
 import { SpaceModel } from '../models/space.model';
 import { UserModel } from '../models/user.model';
+import { log } from 'console';
+
+const schedule = require('node-schedule');
 
 interface DayPassBookingRequest extends Request {
   body: {
@@ -181,6 +184,77 @@ export const getdaypassbookings = async (req: Request, res: Response) => {
   }
 };
 
+//check if daypass is available or not
+export const checkDaypassAvaiableForLocation = async (
+  req: Request,
+  res: Response
+) => {
+  // bookDayPass({
+  //   price: likelyprice * quantity,
+  //   spaceName: selectedLocation,
+  //   bookeddate: selectedDate,
+  //   day: selectedDay || 0,
+  //   month: currentMonth + 1,
+  //   year: currentYear,
+  //   quantity: quantity,
+  // });
+
+  const { spaceName, quantity } = req.body;
+
+  //get the space
+  const spacedetailsDaypass = await SpaceModel.findOne({ name: spaceName });
+
+  //space not found
+  if (!spacedetailsDaypass) {
+    return res.status(404).json({ message: 'space not found' });
+  }
+
+  //avaialble space is greater than 0 && //check if daypassquantity is less than availablecapacity
+  if (
+    spacedetailsDaypass.availableCapacity > 0 &&
+    quantity <= spacedetailsDaypass.availableCapacity
+  ) {
+    return res.status(200).json({
+      message: 'success',
+      quantity,
+      availabledaypass: spacedetailsDaypass.availableCapacity,
+    });
+  }
+
+  res.status(400).json({
+    message: 'daypass is not available',
+    quantity,
+    availabledaypass: spacedetailsDaypass.availableCapacity,
+  });
+};
+
+export const checkincordecofdaypassavaialble = async (
+  req: Request,
+  res: Response
+) => {
+  // bookDayPass({
+  //   price: likelyprice * quantity,
+  //   spaceName: selectedLocation,
+  //   bookeddate: selectedDate,
+  //   day: selectedDay || 0,
+  //   month: currentMonth + 1,
+  //   year: currentYear,
+  //   quantity: quantity,
+  // });
+
+  const { spaceName, quantity } = req.body;
+
+  const updatedSpace = await SpaceModel.findOneAndUpdate(
+    { name: spaceName }, // Filter
+    { $inc: { availableCapacity: -quantity } },
+    { new: true, runValidators: true } // Return the updated document
+  );
+
+  res.status(200).json({
+    updatedSpace,
+  });
+};
+
 // {
 //     "_id": {
 //       "$oid": "673c4031b5c2547d36da6687"
@@ -222,3 +296,49 @@ export const getDaypassesOfUser = async (req: Request, res: Response) => {
 };
 
 //
+
+// Job to update availableCapacity
+export const scheduleDayPassJob = () => {
+  schedule.scheduleJob('0 8 * * *', async () => {
+    console.log('Running the day pass update job at 8 AM');
+
+    try {
+      const yesterday = new Date();
+      const previousday = yesterday.setDate(yesterday.getDate() - 1);
+      // const formattedDate = yesterday.toISOString().split('T')[0]; // Format as YYYY-MM-DD if needed
+
+      // Format as "M/D/YYYY"
+      const formattedDate = `${yesterday.getDate()}/${
+        yesterday.getMonth() + 1
+      }/${yesterday.getFullYear()}`;
+
+      // console.log('previous day', previousday);
+
+      console.log('formatted day', formattedDate);
+
+      // Get all day passes for the previous day
+      const dayPasses = await DayPass.find({ date: formattedDate });
+      console.log(dayPasses);
+
+      if (dayPasses.length === 0) {
+        console.log('no daypass for yesterday');
+      }
+
+      //note daypass returns a array of objects
+      // // Loop through day passes and update availableCapacity
+      if (dayPasses) {
+        for (const daypass of dayPasses) {
+          const updatedSpace = await SpaceModel.findOneAndUpdate(
+            { name: daypass.spaceName }, // Filter
+            { $inc: { availableCapacity: daypass.quantity } }, // increment
+            { new: true, runValidators: true } // Return the updated document
+          );
+          console.log(`Updated capacity for space: ${daypass.spaceName}`);
+        }
+      }
+    } catch (error) {
+      // console.error('Error running the day pass job:', error);
+      console.log('something went wrong');
+    }
+  });
+};

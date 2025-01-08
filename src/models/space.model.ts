@@ -8,6 +8,7 @@ interface SpaceInterface extends Document {
   description?: string;
   amenities?: string[];
   capacity: number;
+  availableCapacity: number;
   price: number;
   createdAt?: Date;
 }
@@ -19,6 +20,7 @@ const spaceSchema: Schema = new Schema<SpaceInterface>({
   description: { type: String },
   amenities: { type: [String] },
   capacity: { type: Number, required: true },
+  availableCapacity: { type: Number, min: 0 },
   price: { type: Number },
   createdAt: { type: Date, default: Date.now },
 });

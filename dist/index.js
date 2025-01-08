@@ -19,6 +19,7 @@ const careerRoutes_1 = __importDefault(require("./src/routes/careerRoutes"));
 const DayPassRoute_1 = __importDefault(require("./src/routes/DayPassRoute"));
 const couponRoutes_1 = __importDefault(require("./src/routes/couponRoutes"));
 const zohoRoutes_1 = __importDefault(require("./src/routes/zohoRoutes"));
+const DayPassController_1 = require("./src/controllers/DayPassController");
 const axios = require('axios');
 //import order route
 const OrderRoutes_1 = __importDefault(require("./src/routes/OrderRoutes"));
@@ -125,6 +126,8 @@ const exchangeAuthorizationCode = async () => {
 };
 // Call the function
 // exchangeAuthorizationCode();
+//call the scheduler function
+(0, DayPassController_1.scheduleDayPassJob)();
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });

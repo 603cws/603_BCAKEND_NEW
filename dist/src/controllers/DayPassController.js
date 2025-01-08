@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDaypassesOfUser = exports.getdaypassbookings = exports.createDaypass = exports.DayPassBooking = void 0;
+exports.scheduleDayPassJob = exports.getDaypassesOfUser = exports.checkincordecofdaypassavaialble = exports.checkDaypassAvaiableForLocation = exports.getdaypassbookings = exports.createDaypass = exports.DayPassBooking = void 0;
 const Daypassbookingmodel_1 = require("../models/Daypassbookingmodel");
 const space_model_1 = require("../models/space.model");
 const user_model_1 = require("../models/user.model");
+const schedule = require('node-schedule');
 // user:Types.ObjectId
 // date:string;
 const DayPassBooking = async (req, res) => {
@@ -123,6 +124,59 @@ const getdaypassbookings = async (req, res) => {
     }
 };
 exports.getdaypassbookings = getdaypassbookings;
+//check if daypass is available or not
+const checkDaypassAvaiableForLocation = async (req, res) => {
+    // bookDayPass({
+    //   price: likelyprice * quantity,
+    //   spaceName: selectedLocation,
+    //   bookeddate: selectedDate,
+    //   day: selectedDay || 0,
+    //   month: currentMonth + 1,
+    //   year: currentYear,
+    //   quantity: quantity,
+    // });
+    const { spaceName, quantity } = req.body;
+    //get the space
+    const spacedetailsDaypass = await space_model_1.SpaceModel.findOne({ name: spaceName });
+    //space not found
+    if (!spacedetailsDaypass) {
+        return res.status(404).json({ message: 'space not found' });
+    }
+    //avaialble space is greater than 0 && //check if daypassquantity is less than availablecapacity
+    if (spacedetailsDaypass.availableCapacity > 0 &&
+        quantity <= spacedetailsDaypass.availableCapacity) {
+        return res.status(200).json({
+            message: 'success',
+            quantity,
+            availabledaypass: spacedetailsDaypass.availableCapacity,
+        });
+    }
+    res.status(400).json({
+        message: 'daypass is not available',
+        quantity,
+        availabledaypass: spacedetailsDaypass.availableCapacity,
+    });
+};
+exports.checkDaypassAvaiableForLocation = checkDaypassAvaiableForLocation;
+const checkincordecofdaypassavaialble = async (req, res) => {
+    // bookDayPass({
+    //   price: likelyprice * quantity,
+    //   spaceName: selectedLocation,
+    //   bookeddate: selectedDate,
+    //   day: selectedDay || 0,
+    //   month: currentMonth + 1,
+    //   year: currentYear,
+    //   quantity: quantity,
+    // });
+    const { spaceName, quantity } = req.body;
+    const updatedSpace = await space_model_1.SpaceModel.findOneAndUpdate({ name: spaceName }, // Filter
+    { $inc: { availableCapacity: -quantity } }, { new: true, runValidators: true } // Return the updated document
+    );
+    res.status(200).json({
+        updatedSpace,
+    });
+};
+exports.checkincordecofdaypassavaialble = checkincordecofdaypassavaialble;
 // {
 //     "_id": {
 //       "$oid": "673c4031b5c2547d36da6687"
@@ -162,3 +216,40 @@ const getDaypassesOfUser = async (req, res) => {
 };
 exports.getDaypassesOfUser = getDaypassesOfUser;
 //
+// Job to update availableCapacity
+const scheduleDayPassJob = () => {
+    schedule.scheduleJob('0 8 * * *', async () => {
+        console.log('Running the day pass update job at 8 AM');
+        try {
+            const yesterday = new Date();
+            const previousday = yesterday.setDate(yesterday.getDate() - 1);
+            // const formattedDate = yesterday.toISOString().split('T')[0]; // Format as YYYY-MM-DD if needed
+            // Format as "M/D/YYYY"
+            const formattedDate = `${yesterday.getDate()}/${yesterday.getMonth() + 1}/${yesterday.getFullYear()}`;
+            // console.log('previous day', previousday);
+            console.log('formatted day', formattedDate);
+            // Get all day passes for the previous day
+            const dayPasses = await Daypassbookingmodel_1.DayPass.find({ date: formattedDate });
+            console.log(dayPasses);
+            if (dayPasses.length === 0) {
+                console.log('no daypass for yesterday');
+            }
+            //note daypass returns a array of objects
+            // // Loop through day passes and update availableCapacity
+            if (dayPasses) {
+                for (const daypass of dayPasses) {
+                    const updatedSpace = await space_model_1.SpaceModel.findOneAndUpdate({ name: daypass.spaceName }, // Filter
+                    { $inc: { availableCapacity: daypass.quantity } }, // increment
+                    { new: true, runValidators: true } // Return the updated document
+                    );
+                    console.log(`Updated capacity for space: ${daypass.spaceName}`);
+                }
+            }
+        }
+        catch (error) {
+            // console.error('Error running the day pass job:', error);
+            console.log('something went wrong');
+        }
+    });
+};
+exports.scheduleDayPassJob = scheduleDayPassJob;

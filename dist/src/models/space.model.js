@@ -32,6 +32,7 @@ const spaceSchema = new mongoose_1.Schema({
     description: { type: String },
     amenities: { type: [String] },
     capacity: { type: Number, required: true },
+    availableCapacity: { type: Number, min: 0 },
     price: { type: Number },
     createdAt: { type: Date, default: Date.now },
 });

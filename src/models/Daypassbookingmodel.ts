@@ -28,6 +28,7 @@ interface DayPassInterface extends Document {
   transactionId: string;
   transactionTIme: string;
   transactionAmount: number;
+  quantity: number;
   createdAt?: Date;
 }
 // user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -49,6 +50,7 @@ const DayPassSchema: Schema<DayPassInterface> = new Schema({
   transactionId: { type: String },
   transactionTIme: { type: String },
   transactionAmount: { type: Number },
+  quantity: { type: Number, default: 1 },
   status: {
     type: String,
     // enum: [

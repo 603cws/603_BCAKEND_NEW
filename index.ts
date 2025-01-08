@@ -16,6 +16,7 @@ import daypassroutes from './src/routes/DayPassRoute';
 import couponRoutes from './src/routes/couponRoutes';
 
 import zohoRoutes from './src/routes/zohoRoutes';
+import { scheduleDayPassJob } from './src/controllers/DayPassController';
 
 const axios = require('axios');
 
@@ -156,6 +157,9 @@ const exchangeAuthorizationCode = async () => {
 
 // Call the function
 // exchangeAuthorizationCode();
+
+//call the scheduler function
+scheduleDayPassJob();
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

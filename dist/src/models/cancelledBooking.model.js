@@ -37,6 +37,7 @@ const cancelledbookingSchema = new mongoose_1.Schema({
     transactionId: { type: String },
     transactionTIme: { type: String },
     transactionAmount: { type: Number },
+    daypassQuantity: { type: Number, default: 0 },
     status: {
         type: String,
         // enum: [
