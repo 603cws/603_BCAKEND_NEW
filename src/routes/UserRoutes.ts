@@ -18,6 +18,7 @@ import {
   changeforgotpass,
   getuserDetailsByAdmin,
   requestTour,
+  contactusInterior,
 } from '../controllers/UserControllers';
 import { admin } from '../middlewares/adminMiddleware';
 
@@ -44,6 +45,9 @@ router.post('/getUserByAdmin', getuserDetailsByAdmin);
 
 //send email to admin for request a tour
 router.post('/requestTour', requestTour);
+
+//send a email to admin and user for contact us for 603 interior
+router.post('/contactusInterior', contactusInterior);
 
 //update user details
 

@@ -16,6 +16,7 @@ import {
   requestTourLead,
 } from './zohoController';
 import { decode } from 'punycode';
+import { log } from 'console';
 
 const Users = [
   {
@@ -847,6 +848,55 @@ export const contactus = async (req: Request, res: Response) => {
       htmlContent2
     );
 
+    res
+      .status(200)
+      .json({ msg: 'Request sent to both user and admin successfully!' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: 'Internal server error3' });
+  }
+};
+
+export const contactusInterior = async (req: Request, res: Response) => {
+  try {
+    // console.log(req.body);
+    const sales = process.env.EMAIL_SALES || '';
+    const { name, phone, email, company, message } = req.body;
+
+    const templatePath = path.join(
+      __dirname,
+      '../utils/callbackuserinterior.html'
+    );
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    const a = name;
+    const htmlContent = htmlTemplate.replace('{{name}}', a);
+
+    await sendEmailSales(
+      email,
+      'Your CallBack request has been sent',
+      'Your request has been successfully confirmed.',
+      htmlContent
+    );
+
+    const templatePath2 = path.join(
+      __dirname,
+      '../utils/callbackadmininterior.html'
+    );
+    let htmlTemplate2 = fs.readFileSync(templatePath2, 'utf8');
+
+    const htmlContent2 = htmlTemplate2
+      .replace('{{name}}', a)
+      .replace('{{phone}}', phone)
+      .replace('{{email}}', email)
+      .replace('{{company}}', company)
+      .replace('{{message}}', message);
+
+    await sendEmailSales(
+      sales,
+      'Customer is trying to contact',
+      'A customer has raised a contact request.',
+      htmlContent2
+    );
     res
       .status(200)
       .json({ msg: 'Request sent to both user and admin successfully!' });

@@ -311,7 +311,6 @@ export const scheduleDayPassJob = () => {
       const formattedDate = `${yesterday.getDate()}/${
         yesterday.getMonth() + 1
       }/${yesterday.getFullYear()}`;
-
       // console.log('previous day', previousday);
 
       console.log('formatted day', formattedDate);
