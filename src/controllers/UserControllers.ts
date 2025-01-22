@@ -815,7 +815,7 @@ export const contactus = async (req: Request, res: Response) => {
 
     await createLead(data);
 
-    const templatePath = path.join(__dirname, '../utils/contactus.html');
+    const templatePath = path.join(__dirname, '../utils/callbackuser.html');
     let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     const a = name;

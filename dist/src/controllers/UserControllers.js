@@ -733,7 +733,7 @@ const contactus = async (req, res) => {
             specifications,
         };
         await (0, zohoController_1.createLead)(data);
-        const templatePath = path_1.default.join(__dirname, '../utils/contactus.html');
+        const templatePath = path_1.default.join(__dirname, '../utils/callbackuser.html');
         let htmlTemplate = fs_1.default.readFileSync(templatePath, 'utf8');
         const a = name;
         const htmlContent = htmlTemplate.replace('{{name}}', a);
