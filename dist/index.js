@@ -14,7 +14,7 @@ const ServiceRoute_1 = __importDefault(require("./src/routes/ServiceRoute"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const SpaceRoute_1 = __importDefault(require("./src/routes/SpaceRoute"));
 const creditRoute_1 = __importDefault(require("./src/routes/creditRoute"));
-const cron_1 = require("./api/cron"); // Import your cron handler
+// import { cronHandler } from './api/cron'; // Import your cron handler
 const careerRoutes_1 = __importDefault(require("./src/routes/careerRoutes"));
 const DayPassRoute_1 = __importDefault(require("./src/routes/DayPassRoute"));
 const couponRoutes_1 = __importDefault(require("./src/routes/couponRoutes"));
@@ -66,7 +66,7 @@ app.use((0, cors_1.default)({
 }));
 app.use('api/v1/order/status', (0, cors_1.default)());
 // app.use(cors()); // Allow all origins temporarily
-app.get('/api/cron', cron_1.cronHandler);
+// app.get('/api/cron', cronHandler);
 app.use('/api/v1/services', ServiceRoute_1.default);
 app.use('/api/v1/spaces', SpaceRoute_1.default);
 app.use('/api/v1/bookings', BookingRoutes_1.default);

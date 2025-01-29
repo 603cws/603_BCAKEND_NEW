@@ -9,7 +9,7 @@ import ServiceRoutes from './src/routes/ServiceRoute';
 import cookieParser from 'cookie-parser';
 import SpaceRoutes from './src/routes/SpaceRoute';
 import creditRoutes from './src/routes/creditRoute';
-import { cronHandler } from './api/cron'; // Import your cron handler
+// import { cronHandler } from './api/cron'; // Import your cron handler
 import careerRoutes from './src/routes/careerRoutes';
 import daypassroutes from './src/routes/DayPassRoute';
 
@@ -78,7 +78,7 @@ app.use(
 app.use('api/v1/order/status', cors());
 // app.use(cors()); // Allow all origins temporarily
 
-app.get('/api/cron', cronHandler);
+// app.get('/api/cron', cronHandler);
 app.use('/api/v1/services', ServiceRoutes);
 app.use('/api/v1/spaces', SpaceRoutes);
 app.use('/api/v1/bookings', BookingRoutes);
