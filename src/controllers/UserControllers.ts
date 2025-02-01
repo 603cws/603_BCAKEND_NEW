@@ -15,8 +15,8 @@ import {
   createLeadPopupForm,
   requestTourLead,
 } from './zohoController';
-import { decode } from 'punycode';
-import { log } from 'console';
+// import { decode } from 'punycode';
+// import { log } from 'console';
 
 const Users = [
   {
