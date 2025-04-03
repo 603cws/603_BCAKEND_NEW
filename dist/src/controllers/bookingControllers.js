@@ -3,8 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllCancelledBookingsbyuser = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = exports.checkBookingAvailable = exports.checkTimeOverlap = void 0;
+exports.onlinebookingbyadmin = exports.allbookingbyadmin = exports.deleteBookingbyuser = exports.deleteBookingbyadmin = exports.updateBookingStatus = exports.getBookingsByUserId = exports.getBookingById = exports.getAllCancelledBookingsbyuser = exports.getAllBookingsbyuser = exports.getlocationbookings = exports.createBooking = exports.checkBookingAvailable = exports.checkTimeOverlap = void 0;
 const booking_model_1 = require("../models/booking.model");
+const Daypassbookingmodel_1 = require("../models/Daypassbookingmodel");
 const emailUtils_1 = require("../utils/emailUtils");
 const user_model_1 = require("../models/user.model");
 const fs_1 = __importDefault(require("fs"));
@@ -353,3 +354,80 @@ const allbookingbyadmin = async (req, res) => {
     }
 };
 exports.allbookingbyadmin = allbookingbyadmin;
+const onlinebookingbyadmin = async (req, res) => {
+    try {
+        // Fetch bookings sorted by createdAt in descending order
+        // const allbookings = await BookingModel.find().sort({ createdAt: -1 });
+        const allbookings = await booking_model_1.BookingModel.find({
+            paymentMethod: { $ne: 'credits' },
+        }).sort({ createdAt: -1 });
+        //   {
+        //     "_id": "67cfe2303071f1b46eec6227",
+        //     "user": "67cfe0463071f1b46eec6209",
+        //     "space": "672485905c694d98e3e004d2",
+        //     "companyName": "SATT SHIPPING & LOGISTIC",
+        //     "spaceName": "Millennium Meeting Room",
+        //     "startTime": "3:00 pm",
+        //     "endTime": "4:30 pm",
+        //     "creditsspent": 0,
+        //     "date": "11/3/2025",
+        //     "transactionId": "o8j033m845ajc0",
+        //     "transactionTIme": "12:41",
+        //     "transactionAmount": 706.23,
+        //     "status": "COMPLETED",
+        //     "paymentMethod": "CARD",
+        //     "createdAt": "2025-03-11T07:11:44.709Z",
+        //     "__v": 0
+        // },
+        const alldaypassbookings = await Daypassbookingmodel_1.DayPass.find({
+            paymentMethod: { $ne: 'credits' },
+        }).sort({ createdAt: -1 });
+        //   {
+        //     "quantity": 1,
+        //     "_id": "677b5c5fbe860e2be580d5cb",
+        //     "space": "672483a35c694d98e3e004bb",
+        //     "user": "677b5bc1be860e2be580d5c1",
+        //     "companyName": "Meinigar Technologies Pvt Ltd",
+        //     "email": "rohit@stockarea.io",
+        //     "spaceName": "Sunmill Day Pass",
+        //     "phone": "8850313924",
+        //     "bookeddate": "6/1/2025",
+        //     "startTime": "09:00 am",
+        //     "endTime": "09:00 pm",
+        //     "creditsspent": 0,
+        //     "date": "6/1/2025",
+        //     "day": 6,
+        //     "month": 1,
+        //     "year": 2025,
+        //     "transactionId": "4wj1c3m5kjmao7",
+        //     "transactionTIme": "04:30",
+        //     "transactionAmount": 706.8199999999999,
+        //     "status": "COMPLETED",
+        //     "paymentMethod": "UPI",
+        //     "createdAt": "2025-01-06T04:30:23.707Z",
+        //     "__v": 0
+        // },
+        console.log(allbookings.length);
+        console.log(alldaypassbookings.length);
+        // Fetch users with only the _id and extracredits fields
+        const allusers = await user_model_1.UserModel.find({}, { _id: 1, extracredits: 1 });
+        // Merge both arrays and sort by createdAt in descending order
+        const combinedBookings = [...allbookings, ...alldaypassbookings];
+        // const combinedBookings = [...allbookings, ...alldaypassbookings].sort(
+        //   (a, b) =>
+        //     new Date(b.createdAt || 0).getTime() -
+        //     new Date(a.createdAt || 0).getTime()
+        // );
+        console.log(combinedBookings.length);
+        return res.status(200).json({
+            msg: 'onlinebookingdetails',
+            combinedBookings,
+            allusers,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Internal server error' });
+    }
+};
+exports.onlinebookingbyadmin = onlinebookingbyadmin;

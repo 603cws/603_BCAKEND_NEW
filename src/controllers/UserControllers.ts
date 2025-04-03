@@ -528,6 +528,7 @@ export const createuser = async (req: Request, res: Response) => {
       monthlycredits,
       location,
       member,
+      role,
     } = body;
 
     const usernameExists = await UserModel.findOne({ username });
@@ -548,7 +549,7 @@ export const createuser = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       phone,
-      role: 'user',
+      role: role,
       kyc: false,
       country,
       state,
@@ -579,6 +580,79 @@ export const createuser = async (req: Request, res: Response) => {
     res.status(500).json({ msg: 'Internal server error1' });
   }
 };
+// export const createuser = async (req: Request, res: Response) => {
+//   const body = req.body;
+//   const validate = createuserInputs.safeParse(body);
+
+//   if (!validate.success) {
+//     return res.status(400).json({ msg: 'Invalid Inputs' });
+//   }
+
+//   try {
+//     const {
+//       companyName,
+//       email,
+//       password,
+//       phone,
+//       username,
+//       country,
+//       state,
+//       zipcode,
+//       city,
+//       monthlycredits,
+//       location,
+//       member,
+//     } = body;
+
+//     const usernameExists = await UserModel.findOne({ username });
+//     if (usernameExists) {
+//       return res.status(409).json({ msg: 'Username exists' });
+//     }
+
+//     const emailExists = await UserModel.findOne({ email });
+//     if (emailExists) {
+//       return res.status(409).json({ msg: 'Email exists' });
+//     }
+
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const user = await UserModel.create({
+//       companyName,
+//       username,
+//       email,
+//       password: hashedPassword,
+//       phone,
+//       role: 'user',
+//       kyc: false,
+//       country,
+//       state,
+//       zipcode,
+//       location,
+//       city,
+//       creditsleft: monthlycredits,
+//       monthlycredits,
+//       member,
+//       createdAt: Date.now(),
+//     });
+
+//     const secretKey = process.env.SECRETKEY;
+//     if (!secretKey) {
+//       console.error('JWT secret key is not defined');
+//       return res.status(500).json({ msg: 'JWT secret key is not defined' });
+//     }
+
+//     const token = jwt.sign({ id: user._id, companyName }, secretKey, {
+//       expiresIn: '1h',
+//     });
+
+//     return res
+//       .status(201)
+//       .json({ msg: 'User created', jwt: token, user: user.companyName });
+//   } catch (e) {
+//     console.error(e);
+//     res.status(500).json({ msg: 'Internal server error1' });
+//   }
+// };
 
 // Get user's details
 export const getuserdetailsorig = async (req: Request, res: Response) => {

@@ -7,6 +7,7 @@ const bookingControllers_1 = require("../controllers/bookingControllers");
 const router = (0, express_1.Router)();
 router.post('/getlocationbookings', bookingControllers_1.getlocationbookings);
 router.get('/admin/getallbookings', adminMiddleware_1.admin, bookingControllers_1.allbookingbyadmin);
+router.get('/admin/getonlinebookings', bookingControllers_1.onlinebookingbyadmin);
 router.post('/', authMiddleware_1.protect, bookingControllers_1.createBooking);
 router.get('/getallbookingsbyuser', authMiddleware_1.protect, bookingControllers_1.getAllBookingsbyuser);
 router.get('/getallcancellbookingsbyuser', authMiddleware_1.protect, bookingControllers_1.getAllCancelledBookingsbyuser);

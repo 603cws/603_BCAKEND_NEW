@@ -648,7 +648,7 @@ export const refund = async (req: Request, res: Response) => {
           { status: 'REFUND' },
           { new: true, runValidators: true }
         );
-        
+
         console.log('bookingthatShouldbecancelled', getbooking);
 
         const getspace = await SpaceModel.findOne({

@@ -12,12 +12,14 @@ import {
   getlocationbookings,
   allbookingbyadmin,
   getAllCancelledBookingsbyuser,
+  onlinebookingbyadmin,
 } from '../controllers/bookingControllers';
 
 const router = Router();
 
 router.post('/getlocationbookings', getlocationbookings);
 router.get('/admin/getallbookings', admin, allbookingbyadmin);
+router.get('/admin/getonlinebookings', onlinebookingbyadmin);
 router.post('/', protect, createBooking);
 router.get('/getallbookingsbyuser', protect, getAllBookingsbyuser);
 router.get(
