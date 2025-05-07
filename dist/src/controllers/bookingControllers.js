@@ -360,7 +360,12 @@ const onlinebookingbyadmin = async (req, res) => {
         // const allbookings = await BookingModel.find().sort({ createdAt: -1 });
         const allbookings = await booking_model_1.BookingModel.find({
             paymentMethod: { $ne: 'credits' },
-        }).sort({ createdAt: -1 });
+        })
+            .populate('user', '_id kyc email company username')
+            .sort({ createdAt: -1 });
+        // const allbookings = await BookingModel.find({
+        //   paymentMethod: { $ne: 'credits' },
+        // }).sort({ createdAt: -1 });
         //   {
         //     "_id": "67cfe2303071f1b46eec6227",
         //     "user": "67cfe0463071f1b46eec6209",
@@ -379,9 +384,14 @@ const onlinebookingbyadmin = async (req, res) => {
         //     "createdAt": "2025-03-11T07:11:44.709Z",
         //     "__v": 0
         // },
+        // const alldaypassbookings = await DayPass.find({
+        //   paymentMethod: { $ne: 'credits' },
+        // }).sort({ createdAt: -1 });
         const alldaypassbookings = await Daypassbookingmodel_1.DayPass.find({
             paymentMethod: { $ne: 'credits' },
-        }).sort({ createdAt: -1 });
+        })
+            .populate('user', '_id kyc email company username')
+            .sort({ createdAt: -1 });
         //   {
         //     "quantity": 1,
         //     "_id": "677b5c5fbe860e2be580d5cb",
@@ -410,7 +420,7 @@ const onlinebookingbyadmin = async (req, res) => {
         console.log(allbookings.length);
         console.log(alldaypassbookings.length);
         // Fetch users with only the _id and extracredits fields
-        const allusers = await user_model_1.UserModel.find({}, { _id: 1, extracredits: 1 });
+        const allusers = await user_model_1.UserModel.find({}, { _id: 1, extracredits: 1, kyc: 1 });
         // Merge both arrays and sort by createdAt in descending order
         const combinedBookings = [...allbookings, ...alldaypassbookings];
         // const combinedBookings = [...allbookings, ...alldaypassbookings].sort(
